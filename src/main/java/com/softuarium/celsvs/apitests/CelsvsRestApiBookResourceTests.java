@@ -135,7 +135,7 @@ public class CelsvsRestApiBookResourceTests extends TestParent {
     @Test(description="Given a non-existing resource, when created, then 201 Created is received")
     public void test_restApiBooksPost_01() {
         final String isbn = randomNumeric(13);
-        final BookRecordPojo br = instantiateBookRecord(isbn);
+        final BookRecordPojo br = instantiateBookRecord(isbn, randomAlphanumeric(10));
         final String uriResource = this.celsvsBaseUri+"/books"+"/"+isbn;
         
         // Post a book
@@ -154,7 +154,7 @@ public class CelsvsRestApiBookResourceTests extends TestParent {
     @Test(description="Given an existing resource, when a creation operation has the same ID, then 409 Conflict is received")
     public void test_restApiBooksPost_02() {
         final String isbn = randomNumeric(13);
-        final BookRecordPojo br = instantiateBookRecord(isbn);
+        final BookRecordPojo br = instantiateBookRecord(isbn, randomAlphanumeric(10));
         final String uriResource = this.celsvsBaseUri+"/books"+"/"+isbn;
         
         // Post a book
@@ -203,17 +203,64 @@ public class CelsvsRestApiBookResourceTests extends TestParent {
     
     @Test(description="Given an existing resource, when a delete operation with primary ID, then 204 No Content is received with no Body")
     public void test_restApiBooksDelete_01() {
-        fail("Not yet implemented");
+        final String isbn = randomNumeric(13);
+        final BookRecordPojo br = instantiateBookRecord(isbn, randomAlphanumeric(10));
+        final String uriResource = this.celsvsBaseUri+"/books"+"/"+isbn;
+        
+        // Post a book
+        Response resp = RestAssured
+            .given().accept(ContentType.JSON).contentType(ContentType.JSON).body(br)
+            .post(uriResource);
+        
+        // Check 201 - Created
+        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
+        
+        // Delete the resource
+        resp = RestAssured
+                .given().accept(ContentType.JSON).contentType(ContentType.JSON)
+                .delete(uriResource);
+        
+        // Check 204 - No content
+        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_NO_CONTENT));
+        
     }
     
     @Test(description="Given an existing resource, when a delete operation with 2ndary ID, then 204 No Content is received with no Body")
     public void test_restApiBooksDelete_02() {
-        fail("Not yet implemented");
+        final String isbn = randomNumeric(13);
+        final String signature = randomAlphanumeric(10);
+        final BookRecordPojo br = instantiateBookRecord(isbn, signature);
+        final String uriResource = this.celsvsBaseUri+"/books"+"/"+isbn;
+        final String uriResourceDel = this.celsvsBaseUri+"/books"+"/"+signature;
+        
+        // Post a book
+        Response resp = RestAssured
+            .given().accept(ContentType.JSON).contentType(ContentType.JSON).body(br)
+            .post(uriResource);
+        
+        // Check 201 - Created
+        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
+        
+        // Delete the resource
+        resp = RestAssured
+                .given().accept(ContentType.JSON).contentType(ContentType.JSON)
+                .delete(uriResourceDel);
+        
+        // Check 204 - No content
+        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_NO_CONTENT));
     }
     
-    @Test(description="Given a non-existing resource, when a delete operation with primary ID, then 404 Not found is received")
+    @Test(description="Given a non-existing resource, when a delete operation with primary ID, then 204 No Content is received with no Body")
     public void test_restApiBooksDelete_03() {
-        fail("Not yet implemented");
+        final String uriResource = this.celsvsBaseUri+"/books"+"/"+randomNumeric(13);
+        
+        // Delete the resource
+        Response resp = RestAssured
+                .given().accept(ContentType.JSON).contentType(ContentType.JSON)
+                .delete(uriResource);
+        
+        // Check 204 - No content (it's idempotent: deleting or not existing doesn't change the resource set)
+        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_NO_CONTENT));
     }
     
     
@@ -243,9 +290,9 @@ public class CelsvsRestApiBookResourceTests extends TestParent {
         }
     }
     
-    private BookRecordPojo instantiateBookRecord(final String isbn) {
+    private BookRecordPojo instantiateBookRecord(final String isbn, final String sign) {
         return new BookRecordPojo(
-                isbn, randomAlphanumeric(10),   // isbn & signature
+                isbn, sign,                     // isbn & signature
                 randomAlphabetic(20),           // title
                 Arrays.asList(randomAlphabetic(15), randomAlphabetic(15)), // authors
                 randomAlphabetic(50),           // subtitle

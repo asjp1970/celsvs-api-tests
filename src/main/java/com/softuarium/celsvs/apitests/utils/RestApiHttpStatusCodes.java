@@ -6,6 +6,7 @@ public class RestApiHttpStatusCodes {
     
     public static int SUCCESS_OK = 200;
     public static int SUCCESS_CREATED = 201;
+    public static int SUCCESS_NO_CONTENT = 204;
     
     
     // 4XX - client error
