@@ -2,26 +2,26 @@ package com.softuarium.celsvs.apitests.utils.mongodb;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class BookRecordPojo {
     
-    private final String isbn;
+    private String isbn;
     
-    private final String signature;
+    private String signature;
     
-    private final String title;
+    private String title;
     
-    private final List<String> authors;
+    private List<String> authors;
     
-    private final String subtitle;
+    private String subtitle;
     
-    private final int numOfCopies;
+    private int numOfCopies;
     
-    private final boolean available;
-    
-    private final Library location;
-        
-    private final BookAdditionalInfo detailedInfo;
+    private boolean available;
+            
+    private BookAdditionalInfo detailedInfo;
 }

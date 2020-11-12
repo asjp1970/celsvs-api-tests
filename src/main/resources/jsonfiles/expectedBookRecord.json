@@ -37,14 +37,12 @@
 		"originalTile": "Understanding the midle ages",
 		"translator": "string"
   		},
-  	"_links": [
-	{
-		"rel": "books",
-		"href": "http://localhost:8080/celsvs/api/books"
-	},
-	{
-		"rel": "self",
-		"href": "http://localhost:8080/celsvs/api/books/9788446027744"
-	}
-  	]
+  	"_links": {
+        "books": {
+            "href": "http://localhost:8080/celsvs/api/books"
+        },
+        "self": {
+            "href": "http://localhost:8080/celsvs/api/books/9788446027744"
+        }
+    }
  }
