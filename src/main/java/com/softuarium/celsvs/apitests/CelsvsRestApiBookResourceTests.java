@@ -1,14 +1,13 @@
 package com.softuarium.celsvs.apitests;
 
-import static com.google.gson.JsonParser.parseString;
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.TestParent;
-import com.softuarium.celsvs.apitests.utils.mongodb.Address;
-import com.softuarium.celsvs.apitests.utils.mongodb.BookAdditionalInfo;
-import com.softuarium.celsvs.apitests.utils.mongodb.BookRecordPojo;
-import com.softuarium.celsvs.apitests.utils.mongodb.ContactInfo;
-import com.softuarium.celsvs.apitests.utils.mongodb.Publisher;
-import com.softuarium.celsvs.apitests.utils.mongodb.Synopsis;
+import com.softuarium.celsvs.apitests.utils.entities.Address;
+import com.softuarium.celsvs.apitests.utils.entities.BookAdditionalInfo;
+import com.softuarium.celsvs.apitests.utils.entities.BookRecordPojo;
+import com.softuarium.celsvs.apitests.utils.entities.ContactInfo;
+import com.softuarium.celsvs.apitests.utils.entities.Publisher;
+import com.softuarium.celsvs.apitests.utils.entities.Synopsis;
 
 import org.testng.annotations.Test;
 
@@ -89,9 +88,8 @@ public class CelsvsRestApiBookResourceTests extends TestParent {
     public void test_restApiBooksGet_01() {
         final String isbn = randomNumeric(13);
         final BookRecordPojo br = instantiateBookRecord(isbn, randomAlphanumeric(10));
-        final String uriResource = this.celsvsBaseUri+"/books"+"/"+isbn;
         
-        testGetExistingEntity(uriResource, br);
+        testGetExistingEntity(this.celsvsBaseUri+"/books"+"/"+isbn, br);
     }
     
     @Test(description="Given a non-existing book record, when retrieved, then 404 not found is received")

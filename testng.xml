@@ -16,12 +16,8 @@
     </run>
   </groups>
     <classes>
-      <class name="com.softuarium.celsvs.apitests.CelsvsRestApiBookResourceTests">
-        <methods>
-          <!-- 
-          <include name="test_restApiBooksPut_03" />          -->
-        </methods>
-      </class> <!-- com.softuarium.celsvs.apitests.CelsvsRestApiBookResourceTests -->
+      <class name="com.softuarium.celsvs.apitests.CelsvsRestApiUserResourceTests">
+      </class>
     </classes>
   </test> <!-- Test access to book resources -->
 </suite> <!-- Celsvs REST API Live tests -->

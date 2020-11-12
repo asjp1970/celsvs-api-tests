@@ -1,4 +1,4 @@
-package com.softuarium.celsvs.apitests.utils.mongodb;
+package com.softuarium.celsvs.apitests.utils.entities;
 
 import lombok.Data;
 

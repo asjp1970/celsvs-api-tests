@@ -15,8 +15,8 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Parameters;
 
-import com.softuarium.celsvs.apitests.utils.mongodb.BookRecordPojo;
-import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
+import com.softuarium.celsvs.apitests.utils.entities.BookRecordPojo;
+import com.softuarium.celsvs.apitests.utils.entities.MongoDbOperations;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -25,9 +25,17 @@ import io.restassured.response.Response;
 public abstract class TestParent {
     
     protected String mongoDbUri;
+    protected String celsvsBaseUri;
 
     protected TestParent() {
         // TODO Auto-generated constructor stub
+    }
+    
+    @Parameters({ "celsvsBaseUri" })
+    @BeforeSuite
+    public void beforeSuite(final String celsvsUri) {
+        this.celsvsBaseUri = celsvsUri;
+        // RestAssured.baseURI = this.celsvsBaseUri;
     }
     
     @BeforeMethod
@@ -103,7 +111,7 @@ public abstract class TestParent {
         // When - retrieved
         resp = RestAssured.given().accept(ContentType.JSON).get(baseUri+"/"+secondaryId);
         
-        // THen - 201 (Created)
+        // Then - 200 (OK)
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
         
         // TODO
@@ -169,6 +177,24 @@ public abstract class TestParent {
     }
     
     protected <T> void testPutNewResourceOk (final String uri, Object entity, Class<T> clazzEntity) {
+        
+        // Put a book
+        Response resp = RestAssured
+            .given().accept(ContentType.JSON).contentType(ContentType.JSON).body(entity)
+            .put(uri);
+        
+        // Check 201 - Created
+        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
+        
+        // Retrieve resource and check is the same
+        resp = RestAssured.given().accept(ContentType.JSON).get(uri);
+        assertThat(resp.getBody().as(clazzEntity), equalTo(entity));
+        
+        // cleanup
+        delete(uri);
+    }
+    
+    protected <T> void testPutExistingResourceOk (final String uri, Object entity, Class<T> clazzEntity) {
         
         // Put a book
         Response resp = RestAssured
