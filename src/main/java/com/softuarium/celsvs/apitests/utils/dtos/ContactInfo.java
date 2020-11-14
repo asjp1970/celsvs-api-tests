@@ -1,4 +1,4 @@
-package com.softuarium.celsvs.apitests.utils.entities;
+package com.softuarium.celsvs.apitests.utils.dtos;
 
 import java.util.List;
 

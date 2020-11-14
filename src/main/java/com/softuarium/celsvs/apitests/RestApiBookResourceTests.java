@@ -2,33 +2,26 @@ package com.softuarium.celsvs.apitests;
 
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.TestParent;
-import com.softuarium.celsvs.apitests.utils.entities.Address;
-import com.softuarium.celsvs.apitests.utils.entities.BookAdditionalInfo;
-import com.softuarium.celsvs.apitests.utils.entities.BookRecordPojo;
-import com.softuarium.celsvs.apitests.utils.entities.ContactInfo;
-import com.softuarium.celsvs.apitests.utils.entities.Publisher;
-import com.softuarium.celsvs.apitests.utils.entities.Synopsis;
+import com.softuarium.celsvs.apitests.utils.dtos.Address;
+import com.softuarium.celsvs.apitests.utils.dtos.BookAdditionalInfo;
+import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
+import com.softuarium.celsvs.apitests.utils.dtos.ContactInfo;
+import com.softuarium.celsvs.apitests.utils.dtos.Publisher;
+import com.softuarium.celsvs.apitests.utils.dtos.Synopsis;
 
 import org.testng.annotations.Test;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import lombok.extern.slf4j.Slf4j;
-
-import org.testng.annotations.BeforeMethod;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Parameters;
-import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeSuite;
 import org.apache.commons.io.FileUtils;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterSuite;
+import org.testng.annotations.AfterClass;
 import static org.testng.Assert.fail;
 
 import java.io.File;
@@ -41,44 +34,26 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
-@Slf4j
 @Test(groups = { "functional", "api" })
-public class CelsvsRestApiBookResourceTests extends TestParent {
+public class RestApiBookResourceTests extends TestParent {
         
-    private String celsvsBaseUri;
+    private String booksUri;
     
-    @Parameters({ "celsvsBaseUri" })
+    @Parameters({ "celsvsBaseUri", "booksUri" })
     @BeforeClass
-    public void beforeClass(final String celsvsUri) {
-        this.celsvsBaseUri = celsvsUri;
-        // RestAssured.baseURI = this.celsvsBaseUri;
-    }
-    
-    @BeforeMethod
-    public void beforeMethod() {
-        // TODO: check that the nr of resources before 
-    }
-    
-    @AfterMethod
-    public void afterMethod() {
-        // TODO: check that the nr of resources are the same as before, or 0, we'll see
-    }
-    
-    @BeforeTest
-    public void beforeTest() {
-    }
-    
-    @AfterTest
-    public void afterTest() {
-    }
-    
-    @BeforeSuite
-    public void beforeSuite() {
+    public void beforeClass(final String celsvsUri, final String booksUriFragment) {
+        
+        this.booksUri = celsvsUri+"/"+booksUriFragment;
         
     }
     
-    @AfterSuite
-    public void afterSuite() {
+    @Parameters({ "booksCollectionName", "publishersCollectionName" })
+    @AfterClass
+    public void afterClass(final String booksCollection, final String publishersCollectionName) {
+        
+        List<String> collectionNames = Arrays.asList(booksCollection, publishersCollectionName);
+        super.cleanupDbCollection(collectionNames);
+        
     }
     
     
@@ -87,31 +62,31 @@ public class CelsvsRestApiBookResourceTests extends TestParent {
     @Test(description="Given an existing book record, when retrieved, then 200 OK and correct json is received")
     public void test_restApiBooksGet_01() {
         final String isbn = randomNumeric(13);
-        final BookRecordPojo br = instantiateBookRecord(isbn, randomAlphanumeric(10));
+        final BookDto br = instantiateBookRecord(isbn, randomAlphanumeric(10));
         
-        testGetExistingEntity(this.celsvsBaseUri+"/books"+"/"+isbn, br);
+        testGetExistingEntity(this.booksUri+"/"+isbn, br);
     }
     
     @Test(description="Given a non-existing book record, when retrieved, then 404 not found is received")
     public void test_restApiBooksGet_02() {
         String isbnRandom = randomNumeric(13);
     
-        this.testGetNonExistingEntity(this.celsvsBaseUri+"/books"+"/"+isbnRandom);
+        this.testGetNonExistingEntity(this.booksUri+"/"+isbnRandom);
     }
     
     @Test(description="Given an existing book record, when retrieved using signature, then 200 OK and correct json is received")
     public void test_restApiBooksGet_03() {
         final String isbn = randomNumeric(13);
         final String sign = randomAlphanumeric(10);
-        final BookRecordPojo br = instantiateBookRecord(isbn, sign);
+        final BookDto br = instantiateBookRecord(isbn, sign);
         
-        this.testGetExistingEntity2ndKey(this.celsvsBaseUri+"/books", isbn, sign, br);
+        this.testGetExistingEntity2ndKey(this.booksUri, isbn, sign, br);
     }
     
     @Test(description="Given several existing book records, when all retrieved, then 200 OK")
     public void test_restApiBooksGet_04() {
     
-        this.testGetAllResources(this.celsvsBaseUri+"/books");
+        this.testGetAllResources(this.booksUri);
     }
     
     @Test(groups = {"unstable"},
@@ -121,12 +96,12 @@ public class CelsvsRestApiBookResourceTests extends TestParent {
         final int totalRecords = 10;
         final int numPages = 5;
         final int sizePage = 2;
-        final String uriResource = this.celsvsBaseUri.concat("/books/").concat(String.format("?page=%d&size=%d&sortBy=isbn&sortOrder=asc", numPages, sizePage));
+        final String uriResource = this.booksUri.concat(String.format("?page=%d&size=%d&sortBy=isbn&sortOrder=asc", numPages, sizePage));
     
-        List<BookRecordPojo> list = createManyBookRecords(totalRecords);
+        List<BookDto> list = createManyBookRecords(totalRecords);
         list.forEach(br -> {
             Response resp = RestAssured.given().accept(ContentType.JSON).contentType(ContentType.JSON).body(br)
-                                .post(this.celsvsBaseUri+"/books"+"/"+br.getIsbn());
+                                .post(this.booksUri+"/"+br.getIsbn());
             assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
             }
             );
@@ -134,12 +109,12 @@ public class CelsvsRestApiBookResourceTests extends TestParent {
         Response response = RestAssured.given().accept(ContentType.JSON).get(uriResource);
         
         assertThat(response.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
-        assertThat(response.getBody().jsonPath().getList(".", BookRecordPojo.class).size(), equalTo(sizePage));       
+        assertThat(response.getBody().jsonPath().getList(".", BookDto.class).size(), equalTo(sizePage));       
         
         // cleanup
         list.forEach(br -> {
             Response resp = RestAssured.given().accept(ContentType.JSON).contentType(ContentType.JSON)
-                    .delete(this.celsvsBaseUri+"/books"+"/"+br.getIsbn());
+                    .delete(this.booksUri+"/"+br.getIsbn());
             assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_NO_CONTENT));
             }
             );
@@ -152,18 +127,18 @@ public class CelsvsRestApiBookResourceTests extends TestParent {
     public void test_restApiBooksPost_01() {
         
         final String isbn = randomNumeric(13);
-        final BookRecordPojo br = instantiateBookRecord(isbn, randomAlphanumeric(10));
+        final BookDto br = instantiateBookRecord(isbn, randomAlphanumeric(10));
         
-        this.testPostNewResourceOk(this.celsvsBaseUri+"/books"+"/"+isbn, br, BookRecordPojo.class);
+        this.testPostNewResourceOk(this.booksUri+"/"+isbn, br, BookDto.class);
     }
     
     @Test(description="Given an existing book record, when a creation operation has the same isbn, then 409 Conflict is received")
     public void test_restApiBooksPost_02() {
         
         final String isbn = randomNumeric(13);
-        final BookRecordPojo br = instantiateBookRecord(isbn, randomAlphanumeric(10));
+        final BookDto br = instantiateBookRecord(isbn, randomAlphanumeric(10));
         
-        this.testPostExistingResourceNok(this.celsvsBaseUri+"/books"+"/"+isbn, br);
+        this.testPostExistingResourceNok(this.booksUri+"/"+isbn, br);
     }
     
     
@@ -172,34 +147,34 @@ public class CelsvsRestApiBookResourceTests extends TestParent {
     @Test(description="Given a non-existing book record, when updated, then 201 Created is received")
     public void test_restApiBooksPut_01() {
         final String isbn = randomNumeric(13);
-        final BookRecordPojo br = instantiateBookRecord(isbn, randomAlphanumeric(10));
+        final BookDto br = instantiateBookRecord(isbn, randomAlphanumeric(10));
         
-        this.testPutNewResourceOk(this.celsvsBaseUri+"/books"+"/"+isbn, br, BookRecordPojo.class);
+        this.testPutNewResourceOk(this.booksUri+"/"+isbn, br, BookDto.class);
     }
      
-    @Test(description="Given an existing resource, when a updated, then 200 OK is received")
+    @Test(description="Given an existing book record, when a updated, then 200 OK is received")
     public void test_restApiBooksPut_02() {
         final String isbn = randomNumeric(13);
-        final BookRecordPojo br = instantiateBookRecord(isbn, randomAlphanumeric(10));
-        final String uriResource = this.celsvsBaseUri+"/books"+"/"+isbn;
+        final BookDto br = instantiateBookRecord(isbn, randomAlphanumeric(10));
+        final String uriResource = this.booksUri+"/"+isbn;
         
         // post a book
-        this.post(uriResource, br, BookRecordPojo.class);
+        this.post(uriResource, br, BookDto.class);
         
         // put to update
         br.setTitle("Much ado about nothing");
-        this.put(uriResource, br, BookRecordPojo.class);
+        this.put(uriResource, br, BookDto.class);
         
-        // cleanup (plain post, put methods in parent class do not delete test entiti
+        // cleanup (plain post, put methods in parent class do not delete test entity
         this.delete(uriResource);
     }
      
-    @Test(description="Given an existing resource, when update operation has the 2ndary ID of another existing resource, then 409 Conflict is received")
+    @Test(description="Given an existing book record, when update operation has the signature of another existing book record, then 409 Conflict is received")
     public void test_restApiBooksPut_03() {
         final String isbn = randomNumeric(13);
         final String sign = randomAlphanumeric(10);
-        final BookRecordPojo br = instantiateBookRecord(isbn, sign);
-        final String uriResource = this.celsvsBaseUri+"/books"+"/"+isbn;
+        final BookDto br = instantiateBookRecord(isbn, sign);
+        final String uriResource = this.booksUri+"/"+isbn;
         
         // post a book and
         Response resp = RestAssured
@@ -211,8 +186,8 @@ public class CelsvsRestApiBookResourceTests extends TestParent {
         
         // put to update: new book record with a clashing signature:
         final String isbn2 = randomNumeric(13);
-        final BookRecordPojo br2 = instantiateBookRecord(isbn2, sign);
-        final String uriResource2 = this.celsvsBaseUri+"/books"+"/"+isbn2;
+        final BookDto br2 = instantiateBookRecord(isbn2, sign);
+        final String uriResource2 = this.booksUri+"/"+isbn2;
         RestAssured.given().accept(ContentType.JSON).contentType(ContentType.JSON).body(br2)
             .put(uriResource2);
         // Check 
@@ -227,28 +202,28 @@ public class CelsvsRestApiBookResourceTests extends TestParent {
      
     // DELETE
     
-    @Test(description="Given an existing resource, when a delete operation with primary ID, then 204 No Content is received with no Body")
+    @Test(description="Given an existing book record, when a delete operation with isbn, then 204 No Content is received with no Body")
     public void test_restApiBooksDelete_01() {
         final String isbn = randomNumeric(13);
-        final BookRecordPojo br = instantiateBookRecord(isbn, randomAlphanumeric(10));
+        final BookDto br = instantiateBookRecord(isbn, randomAlphanumeric(10));
         
-        this.testDeleteExistingEntityOk(this.celsvsBaseUri+"/books"+"/"+isbn, br);
+        this.testDeleteExistingEntityOk(this.booksUri+"/"+isbn, br);
     }
     
-    @Test(description="Given an existing resource, when a delete operation with 2ndary ID, then 204 No Content is received with no Body")
+    @Test(description="Given an existing book record, when a delete operation with signature, then 204 No Content is received with no Body")
     public void test_restApiBooksDelete_02() {
         final String isbn = randomNumeric(13);
         final String signature = randomAlphanumeric(10);
-        final BookRecordPojo br = instantiateBookRecord(isbn, signature);
+        final BookDto br = instantiateBookRecord(isbn, signature);
         
-        this.testDeleteExistingResource2ndKeyOk(this.celsvsBaseUri+"/books", isbn, signature, br);
+        this.testDeleteExistingResource2ndKeyOk(this.booksUri, isbn, signature, br);
         
     }
     
-    @Test(description="Given a non-existing resource, when a delete operation with primary ID, then 204 No Content is received with no Body")
+    @Test(description="Given a non-existing book record, when a delete operation with isbn, then 204 No Content is received with no Body")
     public void test_restApiBooksDelete_03() {
         
-        this.testDeleteNonExistingResourceOk(this.celsvsBaseUri+"/books"+"/"+randomNumeric(13));
+        this.testDeleteNonExistingResourceOk(this.booksUri+"/"+randomNumeric(13));
         
     }
     
@@ -293,16 +268,16 @@ public class CelsvsRestApiBookResourceTests extends TestParent {
         }
     }
     
-    private List<BookRecordPojo> createManyBookRecords (final int qty){
-        List<BookRecordPojo> list = new ArrayList<BookRecordPojo>();
+    private List<BookDto> createManyBookRecords (final int qty){
+        List<BookDto> list = new ArrayList<BookDto>();
         for (int i=0; i<qty; i++) {
             list.add(instantiateBookRecord(randomNumeric(13), randomAlphanumeric(10)));
         }
         return list;
     }
     
-    private BookRecordPojo instantiateBookRecord(final String isbn, final String sign) {
-        return new BookRecordPojo(
+    private BookDto instantiateBookRecord(final String isbn, final String sign) {
+        return new BookDto(
                 isbn, sign,                     // isbn & signature
                 randomAlphabetic(20),           // title
                 Arrays.asList(randomAlphabetic(15), randomAlphabetic(15)), // authors

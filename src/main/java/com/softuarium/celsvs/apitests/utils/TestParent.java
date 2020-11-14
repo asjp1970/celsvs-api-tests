@@ -1,22 +1,16 @@
 package com.softuarium.celsvs.apitests.utils;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.util.Arrays;
 import java.util.List;
 
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.AfterTest;
-import org.testng.annotations.BeforeMethod;
+
 import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Parameters;
 
-import com.softuarium.celsvs.apitests.utils.entities.BookRecordPojo;
-import com.softuarium.celsvs.apitests.utils.entities.MongoDbOperations;
+import com.softuarium.celsvs.apitests.utils.dtos.ITestDto;
+import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -25,53 +19,20 @@ import io.restassured.response.Response;
 public abstract class TestParent {
     
     protected String mongoDbUri;
-    protected String celsvsBaseUri;
+    private String dbName;
+    private MongoDbOperations mongoDbOperations;
 
     protected TestParent() {
         // TODO Auto-generated constructor stub
     }
     
-    @Parameters({ "celsvsBaseUri" })
+    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri" })
     @BeforeSuite
-    public void beforeSuite(final String celsvsUri) {
-        this.celsvsBaseUri = celsvsUri;
+    public void beforeSuite(final String mongodbUri, final String mongoDbName, final String celsvsUri) {
+        this.dbName = mongoDbName;
+        this.mongoDbOperations = new MongoDbOperations("mongodb+srv://celsvs:C0AkLkBoEc2wopDc@celsvs-cluster-0-hskuw.gcp.mongodb.net/test?retryWrites=true&w=majority");
+
         // RestAssured.baseURI = this.celsvsBaseUri;
-    }
-    
-    @BeforeMethod
-    public void beforeMethod() {
-        // TODO: check that the nr of resources before 
-    }
-    
-    @AfterMethod
-    public void afterMethod() {
-        // TODO: check that the nr of resources are the same as before, or 0, we'll see
-    }
-    
-    @BeforeTest
-    public void beforeTest() {
-    }
-    
-    @AfterTest
-    public void afterTest() {
-    }
-    
-    @Parameters({ "mongodbUri", "dbName", "booksCollectionName", "checkoutsCollectionName", "publishersCollectionName", "usersCollectionName"})
-    @BeforeSuite
-    public void beforeSuite(final String mongoDbUri, final String dbName, final String booksCollectionName, final String checkoutsCollectionName, final String publishersCollectionName, final String usersCollectionName) {
-        this.mongoDbUri = mongoDbUri;
-        List<String> collectionNames = Arrays.asList(booksCollectionName, checkoutsCollectionName, publishersCollectionName, usersCollectionName);
-        MongoDbOperations mongoDbOperations = new MongoDbOperations("mongodb+srv://celsvs:C0AkLkBoEc2wopDc@celsvs-cluster-0-hskuw.gcp.mongodb.net/test?retryWrites=true&w=majority");
-        mongoDbOperations.cleanupDb(dbName, collectionNames);
-    }
-    
-    @Parameters({ "mongodbUri", "dbName", "booksCollectionName", "checkoutsCollectionName", "publishersCollectionName", "usersCollectionName"})
-    @AfterSuite
-    public void afterSuite(final String mongoDbUri, final String dbName, final String booksCollectionName, final String checkoutsCollectionName, final String publishersCollectionName, final String usersCollectionName) {
-        List<String> collectionNames = Arrays.asList(booksCollectionName, checkoutsCollectionName, publishersCollectionName, usersCollectionName);
-        MongoDbOperations mongoDbOperations = new MongoDbOperations("mongodb+srv://celsvs:C0AkLkBoEc2wopDc@celsvs-cluster-0-hskuw.gcp.mongodb.net/test?retryWrites=true&w=majority");
-        mongoDbOperations.cleanupDb(dbName, collectionNames);
-        
     }
     
     protected void testGetExistingEntity(final String uri, Object entity) {
@@ -127,11 +88,12 @@ public abstract class TestParent {
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
     }
     
-    protected void testGetAllPaginatedAndSorted(final String paginationUri, List<Object> listOfEnties) {
+    protected <T> void testGetAllPaginatedAndSorted(final String paginationUri, List<T> dtosList) {
         
         final int totalRecords = 10;
         final int numPages = 5;
         final int sizePage = 2;
+
        
     }
     
@@ -257,6 +219,12 @@ public abstract class TestParent {
         
     }
     
+    protected void get(final String uri, final int expectedStatusCode) {
+        
+        RestAssured.given().accept(ContentType.JSON).get(uri).then().statusCode(expectedStatusCode);
+                
+    }
+    
     protected <T> Response post (final String uri, Object entity, Class<T> clazzEntity) {
         
         // Post a book
@@ -270,6 +238,19 @@ public abstract class TestParent {
         // Retrieve resource and check is the same
         resp = RestAssured.given().accept(ContentType.JSON).get(uri);
         assertThat(resp.getBody().as(clazzEntity), equalTo(entity));
+        
+        return resp;
+    }
+    
+    protected <D extends ITestDto> Response post (final String uri, D dto, final int expectedStatusCode) {
+        
+        // Post a book
+        Response resp = RestAssured
+            .given().accept(ContentType.JSON).contentType(ContentType.JSON).body(dto)
+            .post(uri);
+        
+        // Check http status code
+        assertThat(resp.getStatusCode(), equalTo(expectedStatusCode));
         
         return resp;
     }
@@ -310,6 +291,10 @@ public abstract class TestParent {
         RestAssured.given().accept(ContentType.JSON).contentType(ContentType.JSON)
             .delete(uri)
             .then().statusCode(RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+    }
+    
+    protected void cleanupDbCollection(final List<String> collectionNames) {
+        this.mongoDbOperations.cleanupDb(dbName, collectionNames);
     }
 
 }

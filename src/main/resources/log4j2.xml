@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration name="CelsvsRestApiConfig" status="DEBUG" monitorInterval="30">
+<Configuration name="CelsvsRestApiTestsConfig" status="DEBUG" monitorInterval="30">
     <Appenders>
         <Console name="LogToConsole" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n"/>
         </Console>
-        <!-- 
+        <!--  
         <File name="LogToFile" fileName="logs/celsvs_rest_api.log">
       		<PatternLayout>
         		<Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
       		</PatternLayout>
     	</File>
-    	-->
+    	--> 
     </Appenders>
     <Loggers>
     	<Logger name="com.softuarium.celsvs.apitests" level="trace">

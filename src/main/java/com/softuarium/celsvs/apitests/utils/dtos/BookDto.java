@@ -1,4 +1,4 @@
-package com.softuarium.celsvs.apitests.utils.entities;
+package com.softuarium.celsvs.apitests.utils.dtos;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class BookRecordPojo {
+public class BookDto implements ITestDto {
     
     private String isbn;
     

@@ -1,4 +1,4 @@
-package com.softuarium.celsvs.apitests.utils.entities;
+package com.softuarium.celsvs.apitests.utils.mongodb;
 
 import java.util.List;
 
@@ -6,7 +6,6 @@ import com.mongodb.ConnectionString;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoIterable;
 
 public class MongoDbOperations {
     
