@@ -7,6 +7,8 @@ import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
 import com.softuarium.celsvs.apitests.utils.dtos.ContactInfo;
 import com.softuarium.celsvs.apitests.utils.dtos.Publisher;
 import com.softuarium.celsvs.apitests.utils.dtos.Synopsis;
+import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createDto;
+import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createManyDtos;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.post;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.put;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.delete;
@@ -64,7 +66,7 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
     @Test(description="Given an existing book record, when retrieved, then 200 OK and correct json is received")
     public void test_restApiBooksGet_01() {
         final String isbn = randomNumeric(13);
-        final BookDto br = instantiateBookRecord(isbn, randomAlphanumeric(10));
+        final BookDto br = (BookDto) createDto(BookDto.class, isbn, randomAlphanumeric(10));
         
         testGetExistingEntity(this.booksUri+"/"+isbn, br);
     }
@@ -80,7 +82,7 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
     public void test_restApiBooksGet_03() {
         final String isbn = randomNumeric(13);
         final String sign = randomAlphanumeric(10);
-        final BookDto br = instantiateBookRecord(isbn, sign);
+        final BookDto br = (BookDto) createDto(BookDto.class, isbn, sign);
         
         this.testGetExistingEntity2ndKey(this.booksUri, isbn, sign, br);
     }
@@ -100,7 +102,7 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
         final int sizePage = 2;
         final String uriResource = this.booksUri.concat(String.format("?page=%d&size=%d&sortBy=isbn&sortOrder=asc", numPages, sizePage));
     
-        List<BookDto> list = createManyBookRecords(totalRecords);
+        List<BookDto> list = createManyDtos(BookDto.class, totalRecords);
         list.forEach(br -> {
             Response resp = RestAssured.given().accept(ContentType.JSON).contentType(ContentType.JSON).body(br)
                                 .post(this.booksUri+"/"+br.getIsbn());
@@ -129,7 +131,7 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
     public void test_restApiBooksPost_01() {
         
         final String isbn = randomNumeric(13);
-        final BookDto br = instantiateBookRecord(isbn, randomAlphanumeric(10));
+        final BookDto br = (BookDto) createDto(BookDto.class, isbn, randomAlphanumeric(10));
         
         this.testPostNewResourceOk(this.booksUri+"/"+isbn, br, BookDto.class);
     }
@@ -138,7 +140,7 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
     public void test_restApiBooksPost_02() {
         
         final String isbn = randomNumeric(13);
-        final BookDto br = instantiateBookRecord(isbn, randomAlphanumeric(10));
+        final BookDto br = (BookDto) createDto(BookDto.class, isbn, randomAlphanumeric(10));
         
         this.testPostExistingResourceNok(this.booksUri+"/"+isbn, br);
     }
@@ -149,7 +151,7 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
     @Test(description="Given a non-existing book record, when updated, then 201 Created is received")
     public void test_restApiBooksPut_01() {
         final String isbn = randomNumeric(13);
-        final BookDto br = instantiateBookRecord(isbn, randomAlphanumeric(10));
+        final BookDto br = (BookDto) createDto(BookDto.class,isbn, randomAlphanumeric(10));
         
         this.testPutNewResourceOk(this.booksUri+"/"+isbn, br, BookDto.class);
     }
@@ -157,7 +159,7 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
     @Test(description="Given an existing book record, when a updated, then 200 OK is received")
     public void test_restApiBooksPut_02() {
         final String isbn = randomNumeric(13);
-        final BookDto br = instantiateBookRecord(isbn, randomAlphanumeric(10));
+        final BookDto br = (BookDto) createDto(BookDto.class,isbn, randomAlphanumeric(10));
         final String uriResource = this.booksUri+"/"+isbn;
         
         // post a book
@@ -176,7 +178,7 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
     public void test_restApiBooksPut_03() {
         final String isbn = randomNumeric(13);
         final String sign = randomAlphanumeric(10);
-        final BookDto br = instantiateBookRecord(isbn, sign);
+        final BookDto br = (BookDto) createDto(BookDto.class, isbn, sign);
         final String uriResource = this.booksUri+"/"+isbn;
         
         // post a book and
@@ -189,7 +191,7 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
         
         // put to update: new book record with a clashing signature:
         final String isbn2 = randomNumeric(13);
-        final BookDto br2 = instantiateBookRecord(isbn2, sign);
+        final BookDto br2 = (BookDto) createDto(BookDto.class, isbn2, sign);
         final String uriResource2 = this.booksUri+"/"+isbn2;
         RestAssured.given().accept(ContentType.JSON).contentType(ContentType.JSON).body(br2)
             .put(uriResource2);
@@ -208,7 +210,7 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
     @Test(description="Given an existing book record, when a delete operation with isbn, then 204 No Content is received with no Body")
     public void test_restApiBooksDelete_01() {
         final String isbn = randomNumeric(13);
-        final BookDto br = instantiateBookRecord(isbn, randomAlphanumeric(10));
+        final BookDto br = (BookDto) createDto(BookDto.class, isbn, randomAlphanumeric(10));
         
         this.testDeleteExistingEntityOk(this.booksUri+"/"+isbn, br);
     }
@@ -217,7 +219,7 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
     public void test_restApiBooksDelete_02() {
         final String isbn = randomNumeric(13);
         final String signature = randomAlphanumeric(10);
-        final BookDto br = instantiateBookRecord(isbn, signature);
+        final BookDto br = (BookDto) createDto(BookDto.class, isbn, signature);
         
         this.testDeleteExistingResource2ndKeyOk(this.booksUri, isbn, signature, br);
         
@@ -258,65 +260,6 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
     }
     
     
-    // Helper methods
     
-    private String getJsonFromFile(final String jsonFilePath) {
-        ClassLoader classLoader = getClass().getClassLoader();
-        File file = new File(classLoader.getResource(jsonFilePath).getFile());
-        try {
-            return FileUtils.readFileToString(file, "UTF-8");
-        } catch (IOException e) {
-            fail(String.format("Could not read file from jar (%s)", e.getMessage()));
-            return null;
-        }
-    }
     
-    private List<BookDto> createManyBookRecords (final int qty){
-        List<BookDto> list = new ArrayList<BookDto>();
-        for (int i=0; i<qty; i++) {
-            list.add(instantiateBookRecord(randomNumeric(13), randomAlphanumeric(10)));
-        }
-        return list;
-    }
-    
-    private BookDto instantiateBookRecord(final String isbn, final String sign) {
-        return new BookDto(
-                isbn, sign,                     // isbn & signature
-                randomAlphabetic(20),           // title
-                Arrays.asList(randomAlphabetic(15), randomAlphabetic(15)), // authors
-                randomAlphabetic(50),           // subtitle
-                3,                              // num copies
-                true,
-                /*new Library(randomAlphabetic(15),       // library name
-                        new Address(
-                                randomAlphabetic(20),   // street
-                                34,                     // num
-                                randomAlphabetic(20),   // additional info
-                                randomAlphabetic(20),   // city
-                                randomNumeric(5))),*/
-                new BookAdditionalInfo(
-                        new Publisher(
-                                randomAlphabetic(10),   // publisher's name
-                                randomAlphabetic(10),   // publisher's group
-                                new ContactInfo(
-                                        new Address(
-                                                randomAlphabetic(20),   // street
-                                                57,                     // num
-                                                randomAlphabetic(20),   // additional info
-                                                randomAlphabetic(20),   // city
-                                                randomNumeric(5)),      // zip code
-                                        randomAlphabetic(20),
-                                        Arrays.asList(randomNumeric(12), randomNumeric(12))),
-                                randomAlphabetic(20)),  // translator
-                                randomAlphabetic(15),   // collection
-                                new Synopsis(
-                                        478,
-                                        randomAlphabetic(20),   // genre
-                                        randomAlphabetic(20),   // subgenre
-                                        randomAlphabetic(400)), // synopsis
-                                randomAlphabetic(20),   // original title
-                                randomAlphabetic(15)    // translator
-                        )
-                );
-    }
 }
