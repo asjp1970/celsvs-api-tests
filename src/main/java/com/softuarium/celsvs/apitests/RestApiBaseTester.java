@@ -12,18 +12,20 @@ import org.testng.annotations.Parameters;
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.dtos.ITestDto;
 import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
+import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.delete;
+
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
-public abstract class TestParent {
+public abstract class RestApiBaseTester {
     
     protected String mongoDbUri;
     private String dbName;
     private MongoDbOperations mongoDbOperations;
 
-    protected TestParent() {
+    protected RestApiBaseTester() {
         // TODO Auto-generated constructor stub
     }
     
@@ -54,7 +56,7 @@ public abstract class TestParent {
         //        equalTo(parseString(getJsonFromFile("jsonfiles/expectedBookRecord.json"))));
         
         // cleanup
-        delete(uri);
+        delete(uri, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
     }
     
     protected void testGetNonExistingEntity(final String uri) {
@@ -81,7 +83,8 @@ public abstract class TestParent {
         //        equalTo(parseString(getJsonFromFile("jsonfiles/expectedBookRecord.json"))));
         
         // cleanup
-        delete(baseUri+"/"+primaryId);
+        delete(baseUri+"/"+primaryId, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+
     }
     
     protected void testGetAllResources(final String uri) {
@@ -113,7 +116,7 @@ public abstract class TestParent {
         assertThat(resp.getBody().as(clazzEntity), equalTo(entity));
         
         // cleanup
-        delete(uri);
+        delete(uri, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
     }
     
     protected void testPostExistingResourceNok (final String uri, Object entity) {
@@ -135,7 +138,7 @@ public abstract class TestParent {
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.CLIENT_ERR_CONFLICT));
         
         // cleanup
-        delete(uri);
+        delete(uri, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
         
     }
     
@@ -154,7 +157,7 @@ public abstract class TestParent {
         assertThat(resp.getBody().as(clazzEntity), equalTo(entity));
         
         // cleanup
-        delete(uri);
+        delete(uri, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
     }
     
     protected <T> void testPutExistingResourceOk (final String uri, Object entity, Class<T> clazzEntity) {
@@ -172,7 +175,7 @@ public abstract class TestParent {
         assertThat(resp.getBody().as(clazzEntity), equalTo(entity));
         
         // cleanup
-        delete(uri);
+        delete(uri, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
     }
     
     protected <T> void testPutExistingEntityWhisSame2ndKeyNok (final String baseUri, final String primaryId, final String secondaryId, Object entity, Class<T> clazzEntity) {
@@ -191,7 +194,7 @@ public abstract class TestParent {
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
         
         // Delete the resource and check 204 (No Content)
-        delete(uri);
+        delete(uri, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
     }
     
     protected void testDeleteExistingResource2ndKeyOk(final String baseUri, final String primaryId, final String secondaryId, Object entity) {
@@ -208,97 +211,18 @@ public abstract class TestParent {
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
         
         // Delete the resource and check 204 (No Content)
-        delete(uri2ndKey);
+        delete(uri2ndKey, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
     }
     
     public void testDeleteNonExistingResourceOk(final String uri) {
         // Delete the resource and check 204 (No Content)
-        delete(uri);
+        delete(uri, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
     }
     
     public static void stepInfo (final String stepInfoStr) {
         
     }
-    
-    protected void get(final String uri, final int expectedStatusCode) {
-        
-        RestAssured.given().accept(ContentType.JSON).get(uri).then().statusCode(expectedStatusCode);
-                
-    }
-    
-    protected <T> Response post (final String uri, Object entity, Class<T> clazzEntity) {
-        
-        // Post a book
-        Response resp = RestAssured
-            .given().accept(ContentType.JSON).contentType(ContentType.JSON).body(entity)
-            .post(uri);
-        
-        // Check 201 - Created
-        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
-        
-        // Retrieve resource and check is the same
-        resp = RestAssured.given().accept(ContentType.JSON).get(uri);
-        assertThat(resp.getBody().as(clazzEntity), equalTo(entity));
-        
-        return resp;
-    }
-    
-    protected <D extends ITestDto> Response post (final String uri, D dto, final int expectedStatusCode) {
-        
-        // Post a book
-        Response resp = RestAssured
-            .given().accept(ContentType.JSON).contentType(ContentType.JSON).body(dto)
-            .post(uri);
-        
-        // Check http status code
-        assertThat(resp.getStatusCode(), equalTo(expectedStatusCode));
-        
-        return resp;
-    }
-    
-    protected <T> void put (final String uri, Object entity, Class<T> clazzEntity) {
-        
-        // Put a book
-        Response resp = RestAssured
-            .given().accept(ContentType.JSON).contentType(ContentType.JSON).body(entity)
-            .put(uri);
-        
-        // Check 201 - Created
-        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
-        
-        // Retrieve resource and check is the same
-        resp = RestAssured.given().accept(ContentType.JSON).get(uri);
-        assertThat(resp.getBody().as(clazzEntity), equalTo(entity));
-        
-    }
-    
-    protected <T> void put (final String uri, Object entity, Class<T> clazzEntity, final RestApiHttpStatusCodes expectedResultCode) {
-        
-        // Put a book
-        Response resp = RestAssured
-            .given().accept(ContentType.JSON).contentType(ContentType.JSON).body(entity)
-            .put(uri);
-        
-        // Check return code
-        assertThat(resp.getStatusCode(), equalTo(expectedResultCode));
-        
-        // Retrieve resource and check is the same
-        resp = RestAssured.given().accept(ContentType.JSON).get(uri);
-        assertThat(resp.getBody().as(clazzEntity), equalTo(entity));
-        
-    }
-    
-    protected void delete(final String uri, final int expectedStatusCode) {
-        
-        RestAssured.given().accept(ContentType.JSON).delete(uri).then().statusCode(expectedStatusCode);
-                
-    }
-    
-    protected void delete(final String uri) {
-        RestAssured.given().accept(ContentType.JSON).contentType(ContentType.JSON)
-            .delete(uri)
-            .then().statusCode(RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
-    }
+
     
     protected void cleanupDbCollection(final List<String> collectionNames) {
         this.mongoDbOperations.cleanupDb(dbName, collectionNames);

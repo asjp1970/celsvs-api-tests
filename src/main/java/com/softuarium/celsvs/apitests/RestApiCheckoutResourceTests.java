@@ -21,7 +21,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 @Test(groups = { "functional", "api" })
-public class RestApiCheckoutResourceTests extends TestParent {
+public class RestApiCheckoutResourceTests extends RestApiBaseTester {
     
     private String checkoutsUri;
     private String checkoutsDocUri;

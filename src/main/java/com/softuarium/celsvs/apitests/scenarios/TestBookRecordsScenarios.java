@@ -13,15 +13,19 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.softuarium.celsvs.apitests.TestParent;
+import com.softuarium.celsvs.apitests.RestApiBaseTester;
+import com.softuarium.celsvs.apitests.utils.BasicRestOperations;
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
 import com.softuarium.celsvs.apitests.utils.dtos.CkeckoutDto;
 import com.softuarium.celsvs.apitests.utils.dtos.Publisher;
 import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
+import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.get;
+import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.post;
+import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.delete;
 
 @Test(groups = { "functional", "scenarios" })
-public class TestBookRecordsScenarios extends TestParent {
+public class TestBookRecordsScenarios {
     
     private String checkoutsUri;
     private String checkoutsDocUri;
@@ -65,13 +69,13 @@ public class TestBookRecordsScenarios extends TestParent {
         publisher.setName("editorial Crítica");
         UserDto userDto = (UserDto) createDto(UserDto.class, userId);
         
-        this.post(this.booksUri + "/" + isbn1, bookDto, RestApiHttpStatusCodes.SUCCESS_CREATED);
+        post(this.booksUri + "/" + isbn1, bookDto, RestApiHttpStatusCodes.SUCCESS_CREATED);
         
-        this.get(this.publishersUri + "/" + publisher.getName(), RestApiHttpStatusCodes.SUCCESS_OK);
+        get(this.publishersUri + "/" + publisher.getName(), RestApiHttpStatusCodes.SUCCESS_OK);
         
         
         // cleanup resources
-        this.delete(this.booksUri + "/" + isbn1, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        BasicRestOperations.delete(this.booksUri + "/" + isbn1, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
        
     }
     

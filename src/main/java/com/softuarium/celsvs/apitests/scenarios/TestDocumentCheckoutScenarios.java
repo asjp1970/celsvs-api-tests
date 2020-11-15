@@ -1,11 +1,14 @@
 package com.softuarium.celsvs.apitests.scenarios;
 
-import com.softuarium.celsvs.apitests.TestParent;
+import com.softuarium.celsvs.apitests.RestApiBaseTester;
+import com.softuarium.celsvs.apitests.utils.BasicRestOperations;
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
 import com.softuarium.celsvs.apitests.utils.dtos.CkeckoutDto;
 import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createDto;
+import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.post;
+import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.delete;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
@@ -15,7 +18,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 @Test(groups = { "functional", "scenarios" })
-public class TestDocumentCheckoutScenarios extends TestParent {
+public class TestDocumentCheckoutScenarios {
     
     private String checkoutsUri;
     private String checkoutsDocUri;
@@ -53,32 +56,33 @@ public class TestDocumentCheckoutScenarios extends TestParent {
         
         // Step 1. Attempt the checkout by doing a POST on the checkout. Check that 404 Not found
         // is returned because the document does not exist
-        this.post(this.checkoutsDocUri + "/" + signature, checkoutDto,
+        post(this.checkoutsDocUri + "/" + signature, checkoutDto,
                 RestApiHttpStatusCodes.CLIENT_ERR_NOT_FOUND);
         
         // Step 2. Post the document to checkout
-        this.post(this.booksUri + "/" + isbn, 
+        post(this.booksUri + "/" + isbn, 
                 createDto(BookDto.class, isbn, signature),
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
 
         // Step 3. Attempt the checkout again. Now it should fail because the user is not defined,
         // again with 404 Not found
-        this.post(this.checkoutsDocUri + "/" + signature, checkoutDto,
+        post(this.checkoutsDocUri + "/" + signature, checkoutDto,
                 RestApiHttpStatusCodes.CLIENT_ERR_NOT_FOUND);
         
         // Step 4. Post the library user
-        this.post(this.usersUri + "/" + userId, 
+        post(this.usersUri + "/" + userId, 
                 createDto(UserDto.class, userId),
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
         // Step 5. Attempt the checkout again. This time it is expected 202 Created
-        this.post(this.checkoutsDocUri + "/" + signature, checkoutDto,
+        post(this.checkoutsDocUri + "/" + signature, checkoutDto,
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
         // Step 6. cleanup resources
-        this.delete(this.checkoutsDocUri + "/" + signature, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
-        this.delete(this.usersUri + "/" + userId, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
-        this.delete(this.booksUri + "/" + isbn, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        BasicRestOperations.delete(this.checkoutsDocUri + "/" + signature, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        BasicRestOperations.delete(this.checkoutsDocUri + "/" + signature, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        BasicRestOperations.delete(this.usersUri + "/" + userId, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        BasicRestOperations.delete(this.booksUri + "/" + isbn, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
 
         
     }
@@ -101,23 +105,23 @@ public class TestDocumentCheckoutScenarios extends TestParent {
         final String userId = randomAlphanumeric(8);
                 
         // Step 1. Create 4 book and 1 user records
-        this.post(this.booksUri + "/" + isbn1, 
+        post(this.booksUri + "/" + isbn1, 
                 createDto(BookDto.class, isbn1, signature1),
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
-        this.post(this.booksUri + "/" + isbn2, 
+        post(this.booksUri + "/" + isbn2, 
                 createDto(BookDto.class, isbn2, signature2),
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
-        this.post(this.booksUri + "/" + isbn3, 
+        post(this.booksUri + "/" + isbn3, 
                 createDto(BookDto.class, isbn3, signature3),
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
-        this.post(this.booksUri + "/" + isbn4, 
+        post(this.booksUri + "/" + isbn4, 
                 createDto(BookDto.class, isbn4, signature4),
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
-        this.post(this.usersUri + "/" + userId, 
+        post(this.usersUri + "/" + userId, 
                 createDto(UserDto.class, userId),
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
@@ -125,34 +129,34 @@ public class TestDocumentCheckoutScenarios extends TestParent {
         // because the user is under the limit of simultaneous checkouts
         CkeckoutDto checkoutDto1 = (CkeckoutDto) createDto(CkeckoutDto.class, signature1);
         checkoutDto1.setUserId(userId);
-        this.post(this.checkoutsDocUri + "/" + signature1, checkoutDto1,
+        post(this.checkoutsDocUri + "/" + signature1, checkoutDto1,
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
         CkeckoutDto checkoutDto2 = (CkeckoutDto) createDto(CkeckoutDto.class, signature2);
         checkoutDto2.setUserId(userId);
-        this.post(this.checkoutsDocUri + "/" + signature2, checkoutDto2,
+        post(this.checkoutsDocUri + "/" + signature2, checkoutDto2,
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
         CkeckoutDto checkoutDto3 = (CkeckoutDto) createDto(CkeckoutDto.class, signature3);
         checkoutDto3.setUserId(userId);
-        this.post(this.checkoutsDocUri + "/" + signature3, checkoutDto3,
+        post(this.checkoutsDocUri + "/" + signature3, checkoutDto3,
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
         // Step 3. A 4rth document checkout is expected to be answered with 403 - Forbidden:
         CkeckoutDto checkoutDto4 = (CkeckoutDto) createDto(CkeckoutDto.class, signature4);
         checkoutDto4.setUserId(userId);
-        this.post(this.checkoutsDocUri + "/" + signature4, checkoutDto4,
+        post(this.checkoutsDocUri + "/" + signature4, checkoutDto4,
                 RestApiHttpStatusCodes.CLIENT_ERR_FORBIDDEN);
         
         // Step 4. cleanup resources
-        this.delete(this.checkoutsDocUri + "/" + signature1, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
-        this.delete(this.checkoutsDocUri + "/" + signature2, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
-        this.delete(this.checkoutsDocUri + "/" + signature3, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
-        this.delete(this.usersUri + "/" + userId, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
-        this.delete(this.booksUri + "/" + isbn1, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
-        this.delete(this.booksUri + "/" + isbn2, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
-        this.delete(this.booksUri + "/" + isbn3, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
-        this.delete(this.booksUri + "/" + isbn4, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        BasicRestOperations.delete(this.checkoutsDocUri + "/" + signature1, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        BasicRestOperations.delete(this.checkoutsDocUri + "/" + signature2, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        BasicRestOperations.delete(this.checkoutsDocUri + "/" + signature3, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        BasicRestOperations.delete(this.usersUri + "/" + userId, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        BasicRestOperations.delete(this.booksUri + "/" + isbn1, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        BasicRestOperations.delete(this.booksUri + "/" + isbn2, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        BasicRestOperations.delete(this.booksUri + "/" + isbn3, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        BasicRestOperations.delete(this.booksUri + "/" + isbn4, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
 
     }
     

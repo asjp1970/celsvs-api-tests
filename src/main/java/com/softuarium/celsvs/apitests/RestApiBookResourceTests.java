@@ -7,6 +7,9 @@ import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
 import com.softuarium.celsvs.apitests.utils.dtos.ContactInfo;
 import com.softuarium.celsvs.apitests.utils.dtos.Publisher;
 import com.softuarium.celsvs.apitests.utils.dtos.Synopsis;
+import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.post;
+import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.put;
+import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.delete;
 
 import org.testng.annotations.Test;
 
@@ -34,7 +37,7 @@ import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 @Test(groups = { "functional", "api" })
-public class RestApiBookResourceTests extends TestParent {
+public class RestApiBookResourceTests extends RestApiBaseTester {
         
     private String booksUri;
     
@@ -158,14 +161,15 @@ public class RestApiBookResourceTests extends TestParent {
         final String uriResource = this.booksUri+"/"+isbn;
         
         // post a book
-        this.post(uriResource, br, BookDto.class);
+        post(uriResource, br, BookDto.class);
         
         // put to update
         br.setTitle("Much ado about nothing");
-        this.put(uriResource, br, BookDto.class);
+        put(uriResource, br, BookDto.class);
         
         // cleanup (plain post, put methods in parent class do not delete test entity
-        this.delete(uriResource);
+        
+        delete(uriResource, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
     }
      
     @Test(description="Given an existing book record, when update operation has the signature of another existing book record, then 409 Conflict is received")
