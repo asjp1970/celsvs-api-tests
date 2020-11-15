@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class CkeckoutDto implements ITestDto {
+public class CheckoutDto implements ITestDto {
     
     private String signature;
     

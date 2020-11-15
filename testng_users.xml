@@ -19,7 +19,7 @@
     </run>
   </groups>
     <classes>
-      <class name="com.softuarium.celsvs.apitests.CelsvsRestApiUserResourceTests">
+      <class name="com.softuarium.celsvs.apitests.RestApiUserResourceTests">
       </class>
     </classes>
   </test> <!-- Test access to book resources -->

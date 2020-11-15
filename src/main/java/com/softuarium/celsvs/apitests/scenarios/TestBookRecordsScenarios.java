@@ -5,19 +5,12 @@ import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createDto;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.softuarium.celsvs.apitests.RestApiBaseTester;
-import com.softuarium.celsvs.apitests.utils.BasicRestOperations;
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
-import com.softuarium.celsvs.apitests.utils.dtos.CkeckoutDto;
 import com.softuarium.celsvs.apitests.utils.dtos.Publisher;
 import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.get;
@@ -58,16 +51,14 @@ public class TestBookRecordsScenarios {
      *  - If the name has several words, the fist letter of each word will be transformed in capital letter
      *    and the rest small letters
      */
+    @Test(description="Given new book record with publisher in additional info, the name of the publisher is stored normalized")
     public void test_BookScenario_01() {
         
         final String isbn1 = randomNumeric(13);
-        final String isbn2 = randomNumeric(13);
-        final String userId = randomAlphanumeric(8);
         BookDto bookDto = (BookDto) createDto(BookDto.class, isbn1);
         
         Publisher publisher = bookDto.getDetailedInfo().getPublisher();
         publisher.setName("editorial Crítica");
-        UserDto userDto = (UserDto) createDto(UserDto.class, userId);
         
         post(this.booksUri + "/" + isbn1, bookDto, RestApiHttpStatusCodes.SUCCESS_CREATED);
         
@@ -75,14 +66,20 @@ public class TestBookRecordsScenarios {
         
         
         // cleanup resources
-        BasicRestOperations.delete(this.booksUri + "/" + isbn1, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        delete(this.booksUri + "/" + isbn1, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
        
     }
     
     /**
-     * Scenario 1
-     * Given inexistent book and publisher records with a publisher that already exists in the database, then 201 Created
-     * and the publisher's name in the book record is 
+     * TODO
+     * Scenario 2
+     * The deletion of a document record is not possible unless there is no checkout. The test first 
+     * Steps:
+     *  - Create a book record
+     *  - POST a checkout for that book record
+     *  - DELETE the book record. The operation should fail because a user checked the book out
+     *  - DELETE the checkout record (the book is returned to the library)
+     *  - DELETE the book record. The server returns 204 No content 
      */
 }
 

@@ -19,8 +19,8 @@ public class DtoFactory {
         
         ITestDto dto = null;
         
-        if (clazz.isAssignableFrom(CkeckoutDto.class)) {
-            return createDto(CkeckoutDto.class,
+        if (clazz.isAssignableFrom(CheckoutDto.class)) {
+            return createDto(CheckoutDto.class,
                         randomAlphanumeric(10), // signature
                         randomAlphabetic(10));  // userId
         }
@@ -30,7 +30,7 @@ public class DtoFactory {
                         randomAlphanumeric(10));    // signature
         }
         else if(clazz.isAssignableFrom(UserDto.class)) {
-            return createDto(BookDto.class,
+            return createDto(UserDto.class,
                     randomAlphabetic(8),        // first name
                     randomAlphabetic(6));    // last name
         }
@@ -41,8 +41,8 @@ public class DtoFactory {
         
 ITestDto dto = null;
         
-        if (clazz.isAssignableFrom(CkeckoutDto.class)) {
-            return createDto(CkeckoutDto.class, id, // signature
+        if (clazz.isAssignableFrom(CheckoutDto.class)) {
+            return createDto(CheckoutDto.class, id, // signature
                         randomAlphabetic(10));      // userId
         }
         else if (clazz.isAssignableFrom(BookDto.class)) {                    
@@ -50,7 +50,7 @@ ITestDto dto = null;
                         randomAlphanumeric(10));    // signature
         }
         else if(clazz.isAssignableFrom(UserDto.class)) {
-            return createDto(BookDto.class, id,    // first name
+            return createDto(UserDto.class, id,    // first name
                     randomAlphabetic(6));           // last name
         }
         return dto; // null
@@ -60,9 +60,9 @@ ITestDto dto = null;
         
         ITestDto dto = null;
         
-        if (clazz.isAssignableFrom(CkeckoutDto.class)) {
+        if (clazz.isAssignableFrom(CheckoutDto.class)) {
             
-            return new CkeckoutDto(
+            return new CheckoutDto(
                     id,
                     randomAlphabetic(10),
                     Instant.now().toString(),                           // from date
