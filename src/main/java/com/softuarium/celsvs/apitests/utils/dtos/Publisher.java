@@ -1,15 +1,17 @@
 package com.softuarium.celsvs.apitests.utils.dtos;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class Publisher {
     
-    private final String name;
+    private String name;
     
-    private final String group;
+    private String group;
     
-    private final ContactInfo contact;
+    private ContactInfo contact;
     
-    private final String web;
+    private String web;
 }

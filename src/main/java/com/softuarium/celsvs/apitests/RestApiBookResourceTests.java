@@ -1,7 +1,6 @@
 package com.softuarium.celsvs.apitests;
 
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
-import com.softuarium.celsvs.apitests.utils.TestParent;
 import com.softuarium.celsvs.apitests.utils.dtos.Address;
 import com.softuarium.celsvs.apitests.utils.dtos.BookAdditionalInfo;
 import com.softuarium.celsvs.apitests.utils.dtos.BookDto;

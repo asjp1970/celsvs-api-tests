@@ -1,6 +1,5 @@
 package com.softuarium.celsvs.apitests;
 
-import com.softuarium.celsvs.apitests.utils.TestParent;
 import com.softuarium.celsvs.apitests.utils.dtos.CkeckoutDto;
 
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createDto;

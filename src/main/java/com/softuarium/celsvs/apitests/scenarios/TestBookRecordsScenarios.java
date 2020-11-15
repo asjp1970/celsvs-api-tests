@@ -13,10 +13,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import com.softuarium.celsvs.apitests.TestParent;
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
-import com.softuarium.celsvs.apitests.utils.TestParent;
 import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
 import com.softuarium.celsvs.apitests.utils.dtos.CkeckoutDto;
+import com.softuarium.celsvs.apitests.utils.dtos.Publisher;
 import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
 
 @Test(groups = { "functional", "scenarios" })
@@ -25,6 +26,7 @@ public class TestBookRecordsScenarios extends TestParent {
     private String checkoutsUri;
     private String checkoutsDocUri;
     private String booksUri;
+    private String publishersUri;
     private String usersUri;
 
     public TestBookRecordsScenarios() {
@@ -43,9 +45,7 @@ public class TestBookRecordsScenarios extends TestParent {
         
     }
     
-    
-    
-    
+
     /**
      * Scenario 1
      * Given inexistent book and publisher records , when the book is created, then 201 Created is returned,
@@ -54,13 +54,24 @@ public class TestBookRecordsScenarios extends TestParent {
      *  - If the name has several words, the fist letter of each word will be transformed in capital letter
      *    and the rest small letters
      */
-    public void test_checkoutScenario_01() {
+    public void test_BookScenario_01() {
         
-        final String isbn = randomNumeric(13);
-        final String signature = randomAlphanumeric(10);
+        final String isbn1 = randomNumeric(13);
+        final String isbn2 = randomNumeric(13);
         final String userId = randomAlphanumeric(8);
-        CkeckoutDto checkoutDto = (CkeckoutDto) createDto(CkeckoutDto.class, signature);
-        checkoutDto.setUserId(userId);
+        BookDto bookDto = (BookDto) createDto(BookDto.class, isbn1);
+        
+        Publisher publisher = bookDto.getDetailedInfo().getPublisher();
+        publisher.setName("editorial Crítica");
+        UserDto userDto = (UserDto) createDto(UserDto.class, userId);
+        
+        this.post(this.booksUri + "/" + isbn1, bookDto, RestApiHttpStatusCodes.SUCCESS_CREATED);
+        
+        this.get(this.publishersUri + "/" + publisher.getName(), RestApiHttpStatusCodes.SUCCESS_OK);
+        
+        
+        // cleanup resources
+        this.delete(this.booksUri + "/" + isbn1, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
        
     }
     

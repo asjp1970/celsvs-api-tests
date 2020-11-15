@@ -1,4 +1,4 @@
-package com.softuarium.celsvs.apitests.utils;
+package com.softuarium.celsvs.apitests;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -9,6 +9,7 @@ import java.util.List;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Parameters;
 
+import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.dtos.ITestDto;
 import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
 
@@ -285,6 +286,12 @@ public abstract class TestParent {
         resp = RestAssured.given().accept(ContentType.JSON).get(uri);
         assertThat(resp.getBody().as(clazzEntity), equalTo(entity));
         
+    }
+    
+    protected void delete(final String uri, final int expectedStatusCode) {
+        
+        RestAssured.given().accept(ContentType.JSON).delete(uri).then().statusCode(expectedStatusCode);
+                
     }
     
     protected void delete(final String uri) {

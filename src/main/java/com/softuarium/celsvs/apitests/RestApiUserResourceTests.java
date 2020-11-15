@@ -1,6 +1,5 @@
 package com.softuarium.celsvs.apitests;
 
-import com.softuarium.celsvs.apitests.utils.TestParent;
 import com.softuarium.celsvs.apitests.utils.dtos.Address;
 import com.softuarium.celsvs.apitests.utils.dtos.ContactInfo;
 import com.softuarium.celsvs.apitests.utils.dtos.UserDto;

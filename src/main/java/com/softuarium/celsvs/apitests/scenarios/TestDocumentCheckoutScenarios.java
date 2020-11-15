@@ -1,23 +1,18 @@
 package com.softuarium.celsvs.apitests.scenarios;
 
+import com.softuarium.celsvs.apitests.TestParent;
+import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
+import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
+import com.softuarium.celsvs.apitests.utils.dtos.CkeckoutDto;
+import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createDto;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-
-import java.util.Arrays;
-import java.util.List;
-
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
-import com.softuarium.celsvs.apitests.utils.TestParent;
-import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
-import com.softuarium.celsvs.apitests.utils.dtos.CkeckoutDto;
-import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
+import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 @Test(groups = { "functional", "scenarios" })
 public class TestDocumentCheckoutScenarios extends TestParent {
@@ -43,19 +38,9 @@ public class TestDocumentCheckoutScenarios extends TestParent {
         
     }
     
-    @Parameters({ "checkoutsCollectionName" })
-    @AfterClass
-    public void afterClass(final String checkoutsCollection) {
-        
-        List<String> collectionNames = Arrays.asList(checkoutsCollection);
-        //super.cleanupDbCollection(collectionNames);
-        
-    }
-    
-    
     /**
      * Scenario 1
-     * Given unexisting book and user records in database, when attempt to checkout, then if fails until all resources are created
+     * Given inexistent book and user records in database, when attempt to checkout, then if fails until all resources are created
      */
     @Test(description="Checkout not possible until book and user records exist in database")
     public void test_checkoutScenario_01() {
@@ -66,29 +51,35 @@ public class TestDocumentCheckoutScenarios extends TestParent {
         CkeckoutDto checkoutDto = (CkeckoutDto) createDto(CkeckoutDto.class, signature);
         checkoutDto.setUserId(userId);
         
-        // Attempt the checkout
+        // Step 1. Attempt the checkout by doing a POST on the checkout. Check that 404 Not found
+        // is returned because the document does not exist
         this.post(this.checkoutsDocUri + "/" + signature, checkoutDto,
                 RestApiHttpStatusCodes.CLIENT_ERR_NOT_FOUND);
         
-        // Post the document to checkout
+        // Step 2. Post the document to checkout
         this.post(this.booksUri + "/" + isbn, 
                 createDto(BookDto.class, isbn, signature),
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
 
-        // Attempt the checkout again. Now it should fail because the user is not defined
+        // Step 3. Attempt the checkout again. Now it should fail because the user is not defined,
+        // again with 404 Not found
         this.post(this.checkoutsDocUri + "/" + signature, checkoutDto,
                 RestApiHttpStatusCodes.CLIENT_ERR_NOT_FOUND);
         
-        // Post a library user
+        // Step 4. Post the library user
         this.post(this.usersUri + "/" + userId, 
                 createDto(UserDto.class, userId),
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
-        // Finally, this checkout should proceed
+        // Step 5. Attempt the checkout again. This time it is expected 202 Created
         this.post(this.checkoutsDocUri + "/" + signature, checkoutDto,
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
-     
+        // Step 6. cleanup resources
+        this.delete(this.checkoutsDocUri + "/" + signature, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        this.delete(this.usersUri + "/" + userId, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        this.delete(this.booksUri + "/" + isbn, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+
         
     }
     
@@ -109,7 +100,7 @@ public class TestDocumentCheckoutScenarios extends TestParent {
         final String signature4 = randomAlphanumeric(10);
         final String userId = randomAlphanumeric(8);
                 
-        // Create 4 book and 1 user records
+        // Step 1. Create 4 book and 1 user records
         this.post(this.booksUri + "/" + isbn1, 
                 createDto(BookDto.class, isbn1, signature1),
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
@@ -130,7 +121,8 @@ public class TestDocumentCheckoutScenarios extends TestParent {
                 createDto(UserDto.class, userId),
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
-        // checkout 3 documents for the same user
+        // Step 2. checkout 3 documents for the same user. In all cases 202 Created is expected
+        // because the user is under the limit of simultaneous checkouts
         CkeckoutDto checkoutDto1 = (CkeckoutDto) createDto(CkeckoutDto.class, signature1);
         checkoutDto1.setUserId(userId);
         this.post(this.checkoutsDocUri + "/" + signature1, checkoutDto1,
@@ -146,18 +138,24 @@ public class TestDocumentCheckoutScenarios extends TestParent {
         this.post(this.checkoutsDocUri + "/" + signature3, checkoutDto3,
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
-        // A 4rth document checkout is expected to be answered with 403 - Forbidden:
+        // Step 3. A 4rth document checkout is expected to be answered with 403 - Forbidden:
         CkeckoutDto checkoutDto4 = (CkeckoutDto) createDto(CkeckoutDto.class, signature4);
         checkoutDto4.setUserId(userId);
         this.post(this.checkoutsDocUri + "/" + signature4, checkoutDto4,
                 RestApiHttpStatusCodes.CLIENT_ERR_FORBIDDEN);
         
+        // Step 4. cleanup resources
+        this.delete(this.checkoutsDocUri + "/" + signature1, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        this.delete(this.checkoutsDocUri + "/" + signature2, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        this.delete(this.checkoutsDocUri + "/" + signature3, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        this.delete(this.usersUri + "/" + userId, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        this.delete(this.booksUri + "/" + isbn1, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        this.delete(this.booksUri + "/" + isbn2, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        this.delete(this.booksUri + "/" + isbn3, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        this.delete(this.booksUri + "/" + isbn4, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+
     }
     
-    /**
-     * Scenario 3
-     * Given a limit of simultaneous document checkouts = 3, when the 4rth checkout is attempted, then if fails with 403 Forbidden
-     */
 }
 
 
