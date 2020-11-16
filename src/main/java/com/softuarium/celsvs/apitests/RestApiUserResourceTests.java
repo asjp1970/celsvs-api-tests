@@ -1,9 +1,13 @@
 package com.softuarium.celsvs.apitests;
 
-import com.softuarium.celsvs.apitests.utils.dtos.Address;
-import com.softuarium.celsvs.apitests.utils.dtos.ContactInfo;
+import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
+import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
 import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
-import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
+
+import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.delete;
+import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.post;
+import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.put;
+import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createDto;
 
 import org.testng.annotations.Test;
 
@@ -14,10 +18,8 @@ import java.util.List;
 
 import org.testng.annotations.Parameters;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.AfterClass;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
@@ -33,23 +35,13 @@ public class RestApiUserResourceTests extends RestApiBaseTester {
         this.usersUri = celsvsUri+"/"+usersUriFragment;
         
     }
-    
-    @Parameters({ "usersCollectionName" })
-    @AfterClass
-    public void afterClass(final String usersCollection) {
-        
-        List<String> collectionNames = Arrays.asList(usersCollection);
-        super.cleanupDbCollection(collectionNames);
-        
-    }
-    
-    
+  
     // GET
     
     @Test(description="Given an existing user record, when retrieved, then 200 OK and correct json is received")
     public void test_restApiUsersGet_01() {
         final String userId = randomNumeric(10);
-        final UserDto ur = instantiateUserRecord(userId, randomAlphanumeric(10));
+        final UserDto ur = (UserDto) createDto(UserDto.class, userId);
         
         testGetExistingEntity(usersUri+"/"+userId, ur);
     }
@@ -65,9 +57,9 @@ public class RestApiUserResourceTests extends RestApiBaseTester {
     public void test_restApiUsersGet_03() {
         final String userId = randomNumeric(10);
         final String secondaryUid = randomAlphanumeric(10);
-        final UserDto ur = instantiateUserRecord(userId, secondaryUid);
+        final UserDto dto = (UserDto) createDto(UserDto.class, userId, secondaryUid);
         
-        this.testGetExistingEntity2ndKey(usersUri, userId, secondaryUid, ur);
+        this.testGetExistingEntity2ndKey(usersUri, userId, secondaryUid, dto);
     }
     
     @Test(description="Given several existing user records, when all retrieved, then 200 OK")
@@ -79,36 +71,91 @@ public class RestApiUserResourceTests extends RestApiBaseTester {
     @Test(description="Given a non-existing user record, when created, then 201 Created is received")
     public void test_restApiUserPost_01() {
         
-        final String uid = randomAlphanumeric(10);
-        final UserDto r = instantiateUserRecord(uid, randomAlphanumeric(10));
+        final String userId = randomAlphanumeric(10);
+        final UserDto dto = (UserDto) createDto(UserDto.class, userId);
         
-        this.testPostNewResourceOk(usersUri+"/"+uid, r, UserDto.class);
+        this.testPostNewResourceOk(usersUri+"/"+userId, dto, UserDto.class);
     }
     
     @Test(description="Given an existing user record, when a creation operation has the same uid, then 409 Conflict is received")
     public void test_restApiUserPost_02() {
         
-        final String uid = randomNumeric(10);
-        final UserDto r = instantiateUserRecord(uid, randomAlphanumeric(10));
+        final String userId = randomNumeric(10);
+        final UserDto dto = (UserDto) createDto(UserDto.class, userId);
         
-        this.testPostExistingResourceNok(usersUri+"/"+uid, r);
+        this.testPostExistingResourceNok(usersUri+"/"+userId, dto);
     }
     
-    private UserDto instantiateUserRecord(final String uid, final String secondId) {
+    //PUT
+    
+    @Test(description="Given a non-existing user record, when updated, then 201 Created is received")
+    public void test_restApiUsersPut_01() {
+        final String userId = randomNumeric(10);
+        final UserDto dto = (UserDto) createDto(UserDto.class, userId);
         
-        return new UserDto(uid, secondId,
-                randomAlphabetic(8),        // first name
-                randomAlphabetic(6),        // last name
-                new ContactInfo(
-                        new Address(
-                                randomAlphabetic(20),   // street
-                                57,                     // num
-                                randomAlphabetic(20),   // additional info
-                                randomAlphabetic(20),   // city
-                                randomNumeric(5)),      // zip code
-                        randomAlphabetic(20),
-                        Arrays.asList(randomNumeric(12), randomNumeric(12))),
-                randomAlphanumeric(10));
+        this.testPutNewResourceOk(this.usersUri+"/"+userId, dto, UserDto.class);
+    }
+     
+    @Test(description="Given an existing user record, when updated, then 200 OK is received")
+    public void test_restApiUsersPut_02() {
+        final String userId = randomNumeric(10);
+        final UserDto dto = (UserDto) createDto(UserDto.class, userId);
+        
+        // POST a user
+        post(this.usersUri+"/"+userId, dto, UserDto.class);
+        
+        // PUT to update same user
+        dto.setPassword("ABadPassword");
+        put(this.usersUri+"/"+userId, dto, UserDto.class);
+        
+        // cleanup (plain post, put methods in parent class do not delete test entity
+        delete(this.usersUri+"/"+userId, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
     }
     
+    @Test(description="Given an existing user record, when PUT (new user) operation has the second id of another existing user record, then 409 Conflict is received")
+    public void test_restApiUsersPut_03() {
+        final String userId = randomNumeric(10);
+        final String secondId = randomAlphanumeric(10);
+        final UserDto dto = (UserDto) createDto(UserDto.class, userId, secondId);
+        
+        // post a user and
+        post(this.usersUri+"/"+userId, dto, RestApiHttpStatusCodes.SUCCESS_CREATED);
+        
+        // put to update: new user record with a clashing secondary ID:
+        final String userId2 = randomNumeric(10);
+        final BookDto br2 = (BookDto) createDto(BookDto.class, userId2, secondId);
+        
+        put(this.usersUri+"/"+userId, br2, RestApiHttpStatusCodes.CLIENT_ERR_CONFLICT);
+        
+        // cleanup
+        delete(this.usersUri+"/"+userId, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        delete(this.usersUri+"/"+userId2, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+    }
+    
+    // DELETE
+    
+    @Test(description="Given an existing user record, when a delete operation with userId, then 204 No Content is received with no Body")
+    public void test_restApiUsersDelete_01() {
+        final String userId = randomNumeric(10);
+        final UserDto dto = (UserDto) createDto(UserDto.class, userId);
+        
+        this.testDeleteExistingEntityOk(this.usersUri+"/"+userId, dto);
+    }
+    
+    @Test(description="Given an existing user record, when a delete operation with secondary Id, then 204 No Content is received with no Body")
+    public void test_restApiUsersDelete_02() {
+        final String userId = randomNumeric(10);
+        final String secondId = randomAlphanumeric(10);
+        final UserDto dto = (UserDto) createDto(UserDto.class, userId, secondId);
+        
+        this.testDeleteExistingResource2ndKeyOk(this.usersUri+"/"+secondId, userId, secondId, dto);
+        
+    }
+    
+    @Test(description="Given a non-existing user record, when a delete operation with user id, then 204 No Content is received with no Body")
+    public void test_restApiUsersDelete_03() {
+        
+        this.testDeleteNonExistingResourceOk(this.usersUri+"/"+randomNumeric(13));
+        
+    }
 }

@@ -51,16 +51,6 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
         
     }
     
-    @Parameters({ "booksCollectionName", "publishersCollectionName" })
-    @AfterClass
-    public void afterClass(final String booksCollection, final String publishersCollectionName) {
-        
-        List<String> collectionNames = Arrays.asList(booksCollection, publishersCollectionName);
-        super.cleanupDbCollection(collectionNames);
-        
-    }
-    
-    
     // GET
     
     @Test(description="Given an existing book record, when retrieved, then 200 OK and correct json is received")
@@ -179,29 +169,19 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
         final String isbn = randomNumeric(13);
         final String sign = randomAlphanumeric(10);
         final BookDto br = (BookDto) createDto(BookDto.class, isbn, sign);
-        final String uriResource = this.booksUri+"/"+isbn;
         
         // post a book and
-        Response resp = RestAssured
-            .given().accept(ContentType.JSON).contentType(ContentType.JSON).body(br)
-            .post(uriResource);
-        
-        // Check 201 - Created
-        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
+        post(this.booksUri+"/"+isbn, br, RestApiHttpStatusCodes.SUCCESS_CREATED);
         
         // put to update: new book record with a clashing signature:
         final String isbn2 = randomNumeric(13);
         final BookDto br2 = (BookDto) createDto(BookDto.class, isbn2, sign);
-        final String uriResource2 = this.booksUri+"/"+isbn2;
-        RestAssured.given().accept(ContentType.JSON).contentType(ContentType.JSON).body(br2)
-            .put(uriResource2);
-        // Check 
-        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.CLIENT_ERR_CONFLICT));
+        
+        put(this.booksUri+"/"+isbn2, br2, RestApiHttpStatusCodes.CLIENT_ERR_CONFLICT);
         
         // cleanup
-        RestAssured.given().accept(ContentType.JSON).contentType(ContentType.JSON)
-                   .delete(uriResource)
-                   .then().statusCode(RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        delete(this.booksUri+"/"+isbn, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        delete(this.booksUri+"/"+isbn2, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
     }
     
      

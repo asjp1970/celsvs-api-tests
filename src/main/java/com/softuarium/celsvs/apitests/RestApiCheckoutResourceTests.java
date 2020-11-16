@@ -13,7 +13,6 @@ import org.testng.annotations.Test;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.BeforeClass;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 
 import java.util.List;
@@ -100,9 +99,9 @@ public class RestApiCheckoutResourceTests extends RestApiBaseTester {
     }
     
     @Test(description="Given an existing checkout record, when a creation operation has the same signature, then 409 Conflict is received")
-    public void test_restApiBooksPost_01() {
+    public void test_restApiCheckoutsPost_01() {
                
-        // Create the preconditions: a book and a user records must exist:
+        // Step 0: Create the preconditions: a book and a user records must exist:
         final String isbn = randomNumeric(10);
         final String signature = randomNumeric(10);
         final String userId = randomNumeric(8);
@@ -112,9 +111,20 @@ public class RestApiCheckoutResourceTests extends RestApiBaseTester {
         checkoutDto.setUserId(userId);
         post(booksUri + "/" + isbn, bookDto, RestApiHttpStatusCodes.SUCCESS_CREATED);
         post(usersUri + "/" + userId, userDto, RestApiHttpStatusCodes.SUCCESS_CREATED);
-        post(checkoutsDocUri + "/" + signature, checkoutDto, RestApiHttpStatusCodes.CLIENT_ERR_CONFLICT);
         
-        this.testPostExistingResourceNok(checkoutsDocUri + "/" + signature, checkoutDto);
+        // Step 1: send a POST to checkout a document. 201 Created expected
+        post(checkoutsDocUri + "/" + signature, checkoutDto, RestApiHttpStatusCodes.SUCCESS_CREATED);
+        
+        // Step 2: send a 2nd POST to checkout the same document by another user
+        final String userId2 = randomNumeric(8);
+        final UserDto userDto2 = (UserDto) createDto(UserDto.class, userId2);
+        post(usersUri + "/" + userId2, userDto2, RestApiHttpStatusCodes.SUCCESS_CREATED);
+        
+        final CheckoutDto checkoutDto2 = (CheckoutDto) createDto(CheckoutDto.class, signature);
+        checkoutDto2.setUserId(userId2);
+        post(checkoutsDocUri + "/" + signature, checkoutDto2, RestApiHttpStatusCodes.CLIENT_ERR_CONFLICT);
+
+        
     }
     
 }

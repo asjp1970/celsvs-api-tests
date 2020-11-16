@@ -33,7 +33,7 @@ public class BasicRestOperations {
         return resp;
     }
     
-    public static <D extends ITestDto> Response put (final String uri, D dto, final RestApiHttpStatusCodes expectedStatusCode) {
+    public static <D extends ITestDto> Response put (final String uri, D dto, final int expectedStatusCode) {
         
         // Put a book
         Response resp = RestAssured
