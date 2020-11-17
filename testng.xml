@@ -27,7 +27,6 @@
       <run>
         <include name="api"/>
         <exclude name="hypermedia"/>
-        <exclude name="unstable"/>
       </run>
     </groups>
     <classes>

@@ -1,12 +1,7 @@
 package com.softuarium.celsvs.apitests;
 
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
-import com.softuarium.celsvs.apitests.utils.dtos.Address;
-import com.softuarium.celsvs.apitests.utils.dtos.BookAdditionalInfo;
 import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
-import com.softuarium.celsvs.apitests.utils.dtos.ContactInfo;
-import com.softuarium.celsvs.apitests.utils.dtos.Publisher;
-import com.softuarium.celsvs.apitests.utils.dtos.Synopsis;
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createDto;
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createManyDtos;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.post;
@@ -24,21 +19,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.testng.annotations.Parameters;
 import org.testng.annotations.BeforeClass;
-import org.apache.commons.io.FileUtils;
-import org.testng.annotations.AfterClass;
 import static org.testng.Assert.fail;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
-@Test(groups = { "functional", "api" })
+@Test(groups = { "functional", "api", "books" })
 public class RestApiBookResourceTests extends RestApiBaseTester {
         
     private String booksUri;

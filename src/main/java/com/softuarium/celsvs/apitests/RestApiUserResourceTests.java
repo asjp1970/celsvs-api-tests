@@ -1,7 +1,6 @@
 package com.softuarium.celsvs.apitests;
 
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
-import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
 import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
 
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.delete;
@@ -11,19 +10,13 @@ import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createDto;
 
 import org.testng.annotations.Test;
 
-
-
-import java.util.Arrays;
-import java.util.List;
-
 import org.testng.annotations.Parameters;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.AfterClass;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
-@Test(groups = { "functional", "api" })
+@Test(groups = { "functional", "api", "users" })
 public class RestApiUserResourceTests extends RestApiBaseTester {
     
     private String usersUri;
@@ -68,6 +61,9 @@ public class RestApiUserResourceTests extends RestApiBaseTester {
         this.testGetAllResources(usersUri);
     }
     
+    
+    // POST
+    
     @Test(description="Given a non-existing user record, when created, then 201 Created is received")
     public void test_restApiUserPost_01() {
         
@@ -85,6 +81,7 @@ public class RestApiUserResourceTests extends RestApiBaseTester {
         
         this.testPostExistingResourceNok(usersUri+"/"+userId, dto);
     }
+    
     
     //PUT
     
@@ -112,7 +109,7 @@ public class RestApiUserResourceTests extends RestApiBaseTester {
         delete(this.usersUri+"/"+userId, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
     }
     
-    @Test(description="Given an existing user record, when PUT (new user) operation has the second id of another existing user record, then 409 Conflict is received")
+    @Test(description="Given an existing user record, when PUT operation has the second id of another existing user record, then 409 Conflict is received")
     public void test_restApiUsersPut_03() {
         final String userId = randomNumeric(10);
         final String secondId = randomAlphanumeric(10);
@@ -123,14 +120,15 @@ public class RestApiUserResourceTests extends RestApiBaseTester {
         
         // put to update: new user record with a clashing secondary ID:
         final String userId2 = randomNumeric(10);
-        final BookDto br2 = (BookDto) createDto(BookDto.class, userId2, secondId);
+        final UserDto br2 = (UserDto) createDto(UserDto.class, userId2, secondId);
         
-        put(this.usersUri+"/"+userId, br2, RestApiHttpStatusCodes.CLIENT_ERR_CONFLICT);
+        put(this.usersUri+"/"+userId2, br2, RestApiHttpStatusCodes.CLIENT_ERR_CONFLICT);
         
         // cleanup
         delete(this.usersUri+"/"+userId, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
         delete(this.usersUri+"/"+userId2, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
     }
+    
     
     // DELETE
     
@@ -148,7 +146,7 @@ public class RestApiUserResourceTests extends RestApiBaseTester {
         final String secondId = randomAlphanumeric(10);
         final UserDto dto = (UserDto) createDto(UserDto.class, userId, secondId);
         
-        this.testDeleteExistingResource2ndKeyOk(this.usersUri+"/"+secondId, userId, secondId, dto);
+        this.testDeleteExistingResource2ndKeyOk(this.usersUri, userId, secondId, dto);
         
     }
     

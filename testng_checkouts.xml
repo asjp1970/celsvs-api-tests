@@ -20,6 +20,9 @@
   </groups>
     <classes>
       <class name="com.softuarium.celsvs.apitests.RestApiCheckoutResourceTests">
+      <methods>
+      	<include name="test_restApiCheckoutsGet_01"></include>
+      </methods>
       </class>
     </classes>
   </test> <!-- Test access to book resources -->

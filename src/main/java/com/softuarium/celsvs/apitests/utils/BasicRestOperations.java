@@ -75,8 +75,8 @@ public class BasicRestOperations {
             .given().accept(ContentType.JSON).contentType(ContentType.JSON).body(dto)
             .put(uri);
         
-        // Check 201 - Created
-        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
+        // Check 200 - Created
+        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
         
         // Retrieve resource and check is the same
         resp = RestAssured.given().accept(ContentType.JSON).get(uri);

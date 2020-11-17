@@ -13,11 +13,12 @@ import org.testng.annotations.Test;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.BeforeClass;
 
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 
 import java.util.List;
 
-@Test(groups = { "functional", "api" })
+@Test(groups = { "functional", "api", "checkouts" })
 public class RestApiCheckoutResourceTests extends RestApiBaseTester {
     
     private String checkoutsUri;
@@ -103,7 +104,7 @@ public class RestApiCheckoutResourceTests extends RestApiBaseTester {
                
         // Step 0: Create the preconditions: a book and a user records must exist:
         final String isbn = randomNumeric(10);
-        final String signature = randomNumeric(10);
+        final String signature = randomAlphanumeric(8);
         final String userId = randomNumeric(8);
         final BookDto bookDto = (BookDto) createDto(BookDto.class, isbn, signature);
         final UserDto userDto = (UserDto) createDto(UserDto.class, userId);

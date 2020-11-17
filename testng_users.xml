@@ -20,6 +20,9 @@
   </groups>
     <classes>
       <class name="com.softuarium.celsvs.apitests.RestApiUserResourceTests">
+        <methods>
+          
+        </methods>
       </class>
     </classes>
   </test> <!-- Test access to book resources -->
