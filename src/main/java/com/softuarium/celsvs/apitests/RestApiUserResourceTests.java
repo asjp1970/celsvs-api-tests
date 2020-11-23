@@ -16,7 +16,7 @@ import org.testng.annotations.BeforeClass;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
-@Test(groups = { "functional", "api", "users" })
+@Test(groups = { "functional", "api", "aum", "users" })
 public class RestApiUserResourceTests extends RestApiBaseTester {
     
     private String usersUri;

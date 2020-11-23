@@ -54,7 +54,7 @@ public class RestApiCheckoutResourceTests extends RestApiBaseTester {
         // POST & GET the checkout record
         CheckoutDto checkoutDto = (CheckoutDto) createDto(CheckoutDto.class, signature);
         checkoutDto.setUserId(userId);
-        testGetExistingEntity(checkoutsDocUri + "/" + signature, checkoutDto);
+        testGetExistingEntityWithoutBodyComparison(checkoutsDocUri + "/" + signature, checkoutDto);
         
         // cleanup
         delete(booksUri + "/" + isbn, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);

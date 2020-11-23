@@ -51,9 +51,31 @@ public abstract class RestApiBaseTester {
         resp = RestAssured.given().accept(ContentType.JSON).get(uri);
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
         
-        // TODO
-        //assertThat(parseString(resp.getBody().asString()),
-        //        equalTo(parseString(getJsonFromFile("jsonfiles/expectedBookRecord.json"))));
+        // Retrieve resource and check is the same
+        resp = RestAssured.given().accept(ContentType.JSON).get(uri);
+        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
+        assertThat(resp.getBody().as(entity.getClass()), equalTo(entity));
+        
+        // cleanup
+        delete(uri, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+    }
+    
+protected void testGetExistingEntityWithoutBodyComparison(final String uri, Object entity) {
+        
+        // post a book
+        Response resp = RestAssured
+            .given().accept(ContentType.JSON).contentType(ContentType.JSON).body(entity)
+            .post(uri);
+        
+        // Check 201 - Created
+        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
+        
+        resp = RestAssured.given().accept(ContentType.JSON).get(uri);
+        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
+        
+        // Retrieve resource and check is the same
+        resp = RestAssured.given().accept(ContentType.JSON).get(uri);
+        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
         
         // cleanup
         delete(uri, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);

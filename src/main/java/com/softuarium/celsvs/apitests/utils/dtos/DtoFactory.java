@@ -34,12 +34,17 @@ public class DtoFactory {
                     randomAlphabetic(8),        // first name
                     randomAlphabetic(6));    // last name
         }
+        else if(clazz.isAssignableFrom(RoleDto.class)) {
+            return createDto(RoleDto.class,
+                    randomAlphabetic(20),        // name
+                    randomAlphabetic(120));    // description
+        }
         return dto; // null
     }
     
     public static <T extends ITestDto> ITestDto createDto(Class<T> clazz, final String id) {
         
-ITestDto dto = null;
+        ITestDto dto = null;
         
         if (clazz.isAssignableFrom(CheckoutDto.class)) {
             return createDto(CheckoutDto.class, id, // signature
@@ -53,6 +58,11 @@ ITestDto dto = null;
             return createDto(UserDto.class, id,    // first name
                     randomAlphabetic(6));           // last name
         }
+        else if(clazz.isAssignableFrom(RoleDto.class)) {
+            return new RoleDto( id,   // name
+                    randomAlphabetic(120)); // description
+        }
+        
         return dto; // null
     }
     
@@ -119,6 +129,7 @@ ITestDto dto = null;
                             Arrays.asList(randomNumeric(12), randomNumeric(12))),
                     randomAlphanumeric(10));
         }
+        
         return dto;
     }
     
