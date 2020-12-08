@@ -19,7 +19,12 @@
       </run>
     </groups>
     <classes>
-      <class name="com.softuarium.celsvs.apitests.scenarios.TestDocumentCheckoutScenarios"/>
+      <class name="com.softuarium.celsvs.apitests.scenarios.TestBookRecordsScenarios">
+      	<methods>
+      		<include name="test_BookScenario_02"></include>
+      	</methods>
+      </class>
+      <!--  <class name="com.softuarium.celsvs.apitests.scenarios.TestDocumentCheckoutScenarios"/>-->
     </classes>
   </test> <!-- Test access to book resources -->
 </suite> <!-- Celsvs REST API Live tests -->

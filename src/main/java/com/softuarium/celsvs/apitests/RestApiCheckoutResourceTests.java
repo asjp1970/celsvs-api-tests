@@ -89,7 +89,7 @@ public class RestApiCheckoutResourceTests extends RestApiBaseTester {
               
         // GET ALL checkout records
     
-        this.testGetAllResources(checkoutsUri);
+        this.testGetAllResources(checkoutsUri, bookDtosList.size());
         
         // cleanup
         bookDtosList.forEach(d -> {

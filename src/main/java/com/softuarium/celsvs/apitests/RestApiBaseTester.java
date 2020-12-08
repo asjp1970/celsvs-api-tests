@@ -10,7 +10,6 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Parameters;
 
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
-import com.softuarium.celsvs.apitests.utils.dtos.ITestDto;
 import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.delete;
 
@@ -33,7 +32,7 @@ public abstract class RestApiBaseTester {
     @BeforeSuite
     public void beforeSuite(final String mongodbUri, final String mongoDbName, final String celsvsUri) {
         this.dbName = mongoDbName;
-        this.mongoDbOperations = new MongoDbOperations("mongodb+srv://celsvs:C0AkLkBoEc2wopDc@celsvs-cluster-0-hskuw.gcp.mongodb.net/test?retryWrites=true&w=majority");
+        this.mongoDbOperations = new MongoDbOperations(mongodbUri, mongoDbName);
 
         // RestAssured.baseURI = this.celsvsBaseUri;
     }
@@ -60,7 +59,7 @@ public abstract class RestApiBaseTester {
         delete(uri, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
     }
     
-protected void testGetExistingEntityWithoutBodyComparison(final String uri, Object entity) {
+    protected void testGetExistingEntityWithoutBodyComparison(final String uri, Object entity) {
         
         // post a book
         Response resp = RestAssured
@@ -109,9 +108,10 @@ protected void testGetExistingEntityWithoutBodyComparison(final String uri, Obje
 
     }
     
-    protected void testGetAllResources(final String uri) {
+    protected void testGetAllResources(final String uri, final int nrOfResources) {
         Response resp = RestAssured.given().accept(ContentType.JSON).get(uri);
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
+        assertThat(resp.getBody().jsonPath().getList(".").size(), equalTo(nrOfResources));
     }
     
     protected <T> void testGetAllPaginatedAndSorted(final String paginationUri, List<T> dtosList) {

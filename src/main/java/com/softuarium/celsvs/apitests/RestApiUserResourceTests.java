@@ -58,7 +58,7 @@ public class RestApiUserResourceTests extends RestApiBaseTester {
     @Test(description="Given several existing user records, when all retrieved, then 200 OK")
     public void test_restApiUsersGet_04() {
     
-        this.testGetAllResources(usersUri);
+        this.testGetAllResources(usersUri, 0);
     }
     
     

@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
+import com.softuarium.celsvs.apitests.utils.dtos.CheckoutDto;
 import com.softuarium.celsvs.apitests.utils.dtos.Publisher;
 import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.get;
@@ -51,29 +52,29 @@ public class TestBookRecordsScenarios {
      *  - If the name has several words, the fist letter of each word will be transformed in capital letter
      *    and the rest small letters
      */
-    @Test(description="Given new book record with publisher in additional info, the name of the publisher is stored normalized")
+    @Test(description="Given new book record with publisher in additional info, the name of the publisher is stored normalized",
+          groups = { "wip" })
     public void test_BookScenario_01() {
         
-        final String isbn1 = randomNumeric(13);
-        BookDto bookDto = (BookDto) createDto(BookDto.class, isbn1);
+        final String isbn = randomNumeric(13);
+        BookDto bookDto = (BookDto) createDto(BookDto.class, isbn);
         
         Publisher publisher = bookDto.getDetailedInfo().getPublisher();
         publisher.setName("editorial Crítica");
         
-        post(this.booksUri + "/" + isbn1, bookDto, RestApiHttpStatusCodes.SUCCESS_CREATED);
+        post(this.booksUri + "/" + isbn, bookDto, RestApiHttpStatusCodes.SUCCESS_CREATED);
         
         get(this.publishersUri + "/" + publisher.getName(), RestApiHttpStatusCodes.SUCCESS_OK);
         
         
         // cleanup resources
-        delete(this.booksUri + "/" + isbn1, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        delete(this.booksUri + "/" + isbn, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
        
     }
     
     /**
-     * TODO
      * Scenario 2
-     * The deletion of a document record is not possible unless there is no checkout. The test first 
+     * The deletion of a document record is not possible if there are checkouts for it.
      * Steps:
      *  - Create a book record
      *  - POST a checkout for that book record
@@ -81,6 +82,39 @@ public class TestBookRecordsScenarios {
      *  - DELETE the checkout record (the book is returned to the library)
      *  - DELETE the book record. The server returns 204 No content 
      */
+    @Test(description="Given a book record with a checkout, the delete operation fails with 409 - Conflict")
+    public void test_BookScenario_02() {
+        
+        final String isbn = randomNumeric(13);
+        final String userId = randomAlphanumeric(8);
+        
+        // given - a book record and a a checkout for that book...
+        BookDto bookDto = (BookDto) createDto(BookDto.class, isbn);
+        final String signature = bookDto.getSignature();
+        UserDto userDto = (UserDto) createDto(UserDto.class, userId);
+        CheckoutDto checkoutDto = (CheckoutDto) createDto(CheckoutDto.class, signature);
+        checkoutDto.setUserId(userDto.getUserId());
+        post(this.booksUri + "/" + isbn, bookDto, RestApiHttpStatusCodes.SUCCESS_CREATED);
+        post(this.usersUri + "/" + userId, userDto, RestApiHttpStatusCodes.SUCCESS_CREATED);
+        post(this.checkoutsDocUri + "/" + signature, checkoutDto,
+                RestApiHttpStatusCodes.SUCCESS_CREATED);
+        
+        // when - book record deleted then - 409 Conflict is received and the book record is not deleted
+        delete(this.booksUri + "/" + isbn, RestApiHttpStatusCodes.CLIENT_ERR_CONFLICT);
+        get(this.booksUri + "/" + isbn, RestApiHttpStatusCodes.SUCCESS_OK);
+
+        
+        // delete the checkout record (the book is returned to the library)
+        delete(this.checkoutsDocUri + "/" + signature, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        
+        // when - book record deleted then - 204 No Content is received and the book record is deleted
+        delete(this.booksUri + "/" + isbn, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        get(this.booksUri + "/" + isbn, RestApiHttpStatusCodes.CLIENT_ERR_NOT_FOUND);
+
+        // Cleanup:
+        delete(this.usersUri + "/" + userId, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+
+    }
 }
 
 

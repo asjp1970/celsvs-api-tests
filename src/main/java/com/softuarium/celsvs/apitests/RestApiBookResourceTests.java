@@ -18,9 +18,12 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.testng.annotations.Parameters;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+
 import static org.testng.Assert.fail;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
@@ -37,6 +40,12 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
         
         this.booksUri = celsvsUri+"/"+booksUriFragment;
         
+    }
+    
+    @Parameters({ "booksCollectionName", "publishersCollectionName" })
+    @AfterClass
+    public void cleanup(final String booksCollectionName, final String publishersCollectionName) {
+        cleanupDbCollection(Arrays.asList(booksCollectionName, publishersCollectionName));
     }
     
     // GET
@@ -67,8 +76,24 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
     
     @Test(description="Given several existing book records, when all retrieved, then 200 OK")
     public void test_restApiBooksGet_04() {
-    
-        this.testGetAllResources(this.booksUri);
+        final int totalRecords = 10;
+        
+        List<BookDto> list = createManyDtos(BookDto.class, totalRecords);
+        list.forEach(br -> {
+            Response resp = RestAssured.given().accept(ContentType.JSON).contentType(ContentType.JSON).body(br)
+                                .post(this.booksUri+"/"+br.getIsbn());
+            assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
+        });
+        
+        this.testGetAllResources(this.booksUri, totalRecords);
+        
+        // cleanup
+        list.forEach(br -> {
+            Response resp = RestAssured.given().accept(ContentType.JSON).contentType(ContentType.JSON)
+                    .delete(this.booksUri+"/"+br.getIsbn());
+            assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_NO_CONTENT));
+            }
+            );
     }
     
     @Test(groups = {"unstable"},
@@ -85,13 +110,14 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
             Response resp = RestAssured.given().accept(ContentType.JSON).contentType(ContentType.JSON).body(br)
                                 .post(this.booksUri+"/"+br.getIsbn());
             assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
-            }
-            );
+        });
         
         Response response = RestAssured.given().accept(ContentType.JSON).get(uriResource);
         
         assertThat(response.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
-        assertThat(response.getBody().jsonPath().getList(".", BookDto.class).size(), equalTo(sizePage));       
+        System.out.println(response.getBody().jsonPath().getList("."));
+
+        assertThat(response.getBody().jsonPath().getList(".").size(), equalTo(sizePage));
         
         // cleanup
         list.forEach(br -> {
@@ -226,8 +252,4 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
     public void test_hypermedia_04() {
         fail("Not yet implemented");
     }
-    
-    
-    
-    
 }
