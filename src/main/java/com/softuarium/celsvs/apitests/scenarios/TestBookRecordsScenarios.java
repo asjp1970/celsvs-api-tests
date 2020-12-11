@@ -10,6 +10,7 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
+import com.softuarium.celsvs.apitests.utils.dtos.BookAdditionalInfo;
 import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
 import com.softuarium.celsvs.apitests.utils.dtos.CheckoutDto;
 import com.softuarium.celsvs.apitests.utils.dtos.Publisher;
@@ -59,8 +60,11 @@ public class TestBookRecordsScenarios {
         final String isbn = randomNumeric(13);
         BookDto bookDto = (BookDto) createDto(BookDto.class, isbn);
         
-        Publisher publisher = bookDto.getDetailedInfo().getPublisher();
+        BookAdditionalInfo detailedInfo = bookDto.getDetailedInfo();
+        Publisher publisher = detailedInfo.getPublisher();
         publisher.setName("editorial Crítica");
+        detailedInfo.setPublisher(publisher);
+        bookDto.setDetailedInfo(detailedInfo);
         
         post(this.booksUri + "/" + isbn, bookDto, RestApiHttpStatusCodes.SUCCESS_CREATED);
         

@@ -11,11 +11,14 @@ import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.delete;
 
 import org.testng.annotations.Test;
 import org.testng.annotations.Parameters;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeSuite;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Test(groups = { "functional", "api", "checkouts" })
@@ -26,6 +29,12 @@ public class RestApiCheckoutResourceTests extends RestApiBaseTester {
     private String booksUri;
     private String usersUri;
     
+    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri" })
+    @BeforeSuite
+    public void beforeSuite(final String mongodbUri, final String mongoDbName, final String celsvsUri) {
+        super.beforeSuite(mongodbUri, mongoDbName, celsvsUri);
+    }
+    
     @Parameters({ "celsvsBaseUri", "checkoutsUri", "booksUri", "usersUri" })
     @BeforeClass
     public void beforeClass(final String celsvsUri, final String checkoutsUriFragment, final String booksUri, final String usersUri) {
@@ -34,6 +43,13 @@ public class RestApiCheckoutResourceTests extends RestApiBaseTester {
         this.checkoutsDocUri = checkoutsUri + "/document";
         this.booksUri = celsvsUri + "/" + booksUri;
         this.usersUri = celsvsUri + "/" + usersUri;
+    }
+    
+    @Parameters({ "booksCollectionName", "publishersCollectionName", "checkoutsCollectionName", "usersCollectionName"})
+    @AfterMethod
+    public void cleanup(final String booksColName, final String publishersColName,
+                        final String checkoutsColName, final String usersColName) {
+        cleanupDbCollection(Arrays.asList(booksColName, publishersColName, checkoutsColName, usersColName));
     }
     
     
@@ -89,7 +105,7 @@ public class RestApiCheckoutResourceTests extends RestApiBaseTester {
               
         // GET ALL checkout records
     
-        this.testGetAllResources(checkoutsUri, bookDtosList.size());
+        this.testGetAllResources(checkoutsUri, bookDtosList.size(), CheckoutDto.class);
         
         // cleanup
         bookDtosList.forEach(d -> {

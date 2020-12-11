@@ -2,6 +2,8 @@ package com.softuarium.celsvs.apitests;
 
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
+import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
+
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createDto;
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createManyDtos;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.post;
@@ -19,7 +21,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.testng.annotations.Parameters;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
 
 import static org.testng.Assert.fail;
 
@@ -34,6 +39,12 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
         
     private String booksUri;
     
+    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri" })
+    @BeforeSuite
+    public void beforeSuite(final String mongodbUri, final String mongoDbName, final String celsvsUri) {
+        super.beforeSuite(mongodbUri, mongoDbName, celsvsUri);
+    }
+    
     @Parameters({ "celsvsBaseUri", "booksUri" })
     @BeforeClass
     public void beforeClass(final String celsvsUri, final String booksUriFragment) {
@@ -43,7 +54,13 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
     }
     
     @Parameters({ "booksCollectionName", "publishersCollectionName" })
-    @AfterClass
+    @BeforeMethod
+    public void setup(final String booksCollectionName, final String publishersCollectionName) {
+        cleanupDbCollection(Arrays.asList(booksCollectionName, publishersCollectionName));
+    }
+    
+    @Parameters({ "booksCollectionName", "publishersCollectionName" })
+    @AfterMethod
     public void cleanup(final String booksCollectionName, final String publishersCollectionName) {
         cleanupDbCollection(Arrays.asList(booksCollectionName, publishersCollectionName));
     }
@@ -85,7 +102,7 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
             assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
         });
         
-        this.testGetAllResources(this.booksUri, totalRecords);
+        this.testGetAllResources(this.booksUri, totalRecords, BookDto.class);
         
         // cleanup
         list.forEach(br -> {
@@ -96,14 +113,14 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
             );
     }
     
-    @Test(groups = {"unstable"},
-          description="Given several existing book records, when pages retrieved, then 200 OK and pages are OK")
+    @Test (description="Given several existing book records, when pages retrieved, then 200 OK and pages are OK")
     public void test_restApiBooksGet_05() {
         
         final int totalRecords = 10;
-        final int numPages = 5;
         final int sizePage = 2;
-        final String uriResource = this.booksUri.concat(String.format("?page=%d&size=%d&sortBy=isbn&sortOrder=asc", numPages, sizePage));
+        
+        // books?page=0&size=2&sortBy=isbn&sortOrder=asc
+        final String uriResource = this.booksUri.concat(String.format("?page=%d&size=%d&sortBy=isbn&sortOrder=asc", 0, sizePage));
     
         List<BookDto> list = createManyDtos(BookDto.class, totalRecords);
         list.forEach(br -> {
@@ -112,12 +129,7 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
             assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
         });
         
-        Response response = RestAssured.given().accept(ContentType.JSON).get(uriResource);
-        
-        assertThat(response.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
-        System.out.println(response.getBody().jsonPath().getList("."));
-
-        assertThat(response.getBody().jsonPath().getList(".").size(), equalTo(sizePage));
+        this.testGetAllPaginatedAndSorted(uriResource, sizePage);
         
         // cleanup
         list.forEach(br -> {
@@ -126,6 +138,14 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
             assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_NO_CONTENT));
             }
             );
+    }
+    
+    @Test(description="Given an existing book record, when retrieved with Accept other than 'application/hal+json', then 406 Not Acceptable is received")
+    public void test_restApiBooksGet_06() {
+        final String isbn = randomNumeric(13);
+        final BookDto br = (BookDto) createDto(BookDto.class, isbn, randomAlphanumeric(10));
+        
+        testGetWithWrongAcceptHeader(this.booksUri+"/"+isbn, br);
     }
     
     
@@ -160,18 +180,13 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
         this.testPutNewResourceOk(this.booksUri+"/"+isbn, br, BookDto.class);
     }
      
-    @Test(description="Given an existing book record, when a updated, then 200 OK is received")
+    @Test(description="Given an existing book record, when updated, then 200 OK is received")
     public void test_restApiBooksPut_02() {
         final String isbn = randomNumeric(13);
         final BookDto br = (BookDto) createDto(BookDto.class,isbn, randomAlphanumeric(10));
         final String uriResource = this.booksUri+"/"+isbn;
         
-        // post a book
-        post(uriResource, br, BookDto.class);
-        
-        // put to update
-        br.setTitle("Much ado about nothing");
-        put(uriResource, br, BookDto.class);
+        this.testPutExistingResourceOk(this.booksUri+"/"+isbn, br, BookDto.class);
         
         // cleanup (plain post, put methods in parent class do not delete test entity
         

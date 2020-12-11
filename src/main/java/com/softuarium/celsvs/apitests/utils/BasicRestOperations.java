@@ -16,7 +16,7 @@ public class BasicRestOperations {
 
     public static void get(final String uri, final int expectedStatusCode) {
         
-        RestAssured.given().accept(ContentType.JSON).get(uri).then().statusCode(expectedStatusCode);
+        RestAssured.given().accept("application/*+json").get(uri).then().statusCode(expectedStatusCode);
                 
     }
     
@@ -62,7 +62,7 @@ public class BasicRestOperations {
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
         
         // Retrieve resource and check is the same
-        resp = RestAssured.given().accept(ContentType.JSON).get(uri);
+        resp = RestAssured.given().accept("application/json").get(uri);
         assertThat(resp.getBody().as(clazzEntity), equalTo(dto));
         
         return resp;
@@ -79,7 +79,7 @@ public class BasicRestOperations {
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
         
         // Retrieve resource and check is the same
-        resp = RestAssured.given().accept(ContentType.JSON).get(uri);
+        resp = RestAssured.given().accept("application/json").get(uri);
         assertThat(resp.getBody().as(clazzEntity), equalTo(dto));
         
     }

@@ -1,11 +1,13 @@
 package com.softuarium.celsvs.apitests.utils.mongodb;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+import static org.hamcrest.CoreMatchers.containsString;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
@@ -37,7 +39,13 @@ public class MongoDbOperations {
         
     public void cleanupDb (final String dbName, final List<String> collectionNames) {
         try {
-            collectionNames.forEach(coll -> this.db.getCollection(coll).drop());
+            collectionNames.forEach(coll -> {
+                                        if (this.db.listCollectionNames()
+                                                .into(new ArrayList<String>())
+                                                .contains(coll)) {
+                                            this.db.getCollection(coll).drop();
+                                        }
+                                        });
         }
         catch(MongoCommandException e) {
             // It happens when the collection to drop does not already exist

@@ -17,6 +17,6 @@ public class CheckoutDto implements ITestDto {
     
     private String expiringDate;
     
-    private int nrRenewals = 0;
+    private int renewals = 0;
 
 }

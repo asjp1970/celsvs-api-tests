@@ -1,19 +1,34 @@
 package com.softuarium.celsvs.apitests;
 
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
+import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
 import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.delete;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.post;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.put;
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createDto;
+import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createManyDtos;
 
 import org.testng.annotations.Test;
 
 import org.testng.annotations.Parameters;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeSuite;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+import java.util.Arrays;
+import java.util.List;
+
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 @Test(groups = { "functional", "api", "aum", "users" })
@@ -21,12 +36,30 @@ public class RestApiUserResourceTests extends RestApiBaseTester {
     
     private String usersUri;
     
+    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri" })
+    @BeforeSuite
+    public void beforeSuite(final String mongodbUri, final String mongoDbName, final String celsvsUri) {
+        super.beforeSuite(mongodbUri, mongoDbName, celsvsUri);
+    }
+    
     @Parameters({ "celsvsBaseUri", "usersUri" })
     @BeforeClass
     public void beforeClass(final String celsvsUri, final String usersUriFragment) {
         
         this.usersUri = celsvsUri+"/"+usersUriFragment;
         
+    }
+    
+    @Parameters({ "usersCollectionName" })
+    @BeforeMethod
+    public void setup(final String usersCollectionName) {
+        cleanupDbCollection(Arrays.asList(usersCollectionName));
+    }
+    
+    @Parameters({"usersCollectionName"})
+    @AfterMethod
+    public void cleanup(final String usersCollectionName) {
+        cleanupDbCollection(Arrays.asList(usersCollectionName));
     }
   
     // GET
@@ -57,8 +90,24 @@ public class RestApiUserResourceTests extends RestApiBaseTester {
     
     @Test(description="Given several existing user records, when all retrieved, then 200 OK")
     public void test_restApiUsersGet_04() {
-    
-        this.testGetAllResources(usersUri, 0);
+        final int totalRecords = 10;
+        
+        List<UserDto> list = createManyDtos(UserDto.class, totalRecords);
+        list.forEach(r -> {
+            Response resp = RestAssured.given().accept(ContentType.JSON).contentType(ContentType.JSON).body(r)
+                                .post(this.usersUri+"/"+r.getUserId());
+            assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
+        });
+        
+        this.testGetAllResources(this.usersUri, totalRecords, UserDto.class);
+        
+        // cleanup
+        list.forEach(r -> {
+            Response resp = RestAssured.given().accept(ContentType.JSON).contentType(ContentType.JSON)
+                    .delete(this.usersUri+"/"+r.getUserId());
+            assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_NO_CONTENT));
+            }
+            );
     }
     
     

@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 <suite name="Celsvs REST API Live tests">
-  <parameter name="mongodbUri"  value="wewe"/>
-  <!-- mongodb+srv://celsvs:C0AkLkBoEc2wopDc@celsvs-cluster-0-hskuw.gcp.mongodb.net/test?retryWrites=true&w=majority -->
+  <parameter name="mongodbUri"  value="mongodb+srv://celsvs:C0AkLkBoEc2wopDc@celsvs-cluster-0-hskuw.gcp.mongodb.net/test?retryWrites=true&amp;w=majority"/>
   <parameter name="dbName" value="biblioteca_test_db"/>
   <parameter name="booksCollectionName" value="books"/>
   <parameter name="checkoutsCollectionName" value="checkouts"/>
@@ -19,12 +18,8 @@
       </run>
     </groups>
     <classes>
-      <class name="com.softuarium.celsvs.apitests.scenarios.TestBookRecordsScenarios">
-      	<methods>
-      		<include name="test_BookScenario_02"></include>
-      	</methods>
-      </class>
-      <!--  <class name="com.softuarium.celsvs.apitests.scenarios.TestDocumentCheckoutScenarios"/>-->
+      <class name="com.softuarium.celsvs.apitests.scenarios.TestBookRecordsScenarios"/>
+      <class name="com.softuarium.celsvs.apitests.scenarios.TestDocumentCheckoutScenarios"/>
     </classes>
   </test> <!-- Test access to book resources -->
 </suite> <!-- Celsvs REST API Live tests -->

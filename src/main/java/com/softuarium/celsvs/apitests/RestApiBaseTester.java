@@ -5,11 +5,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.List;
 
-
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Parameters;
 
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
+import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
+import com.softuarium.celsvs.apitests.utils.dtos.CheckoutDto;
+import com.softuarium.celsvs.apitests.utils.dtos.ITestDto;
+import com.softuarium.celsvs.apitests.utils.dtos.RoleDto;
+import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
 import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.delete;
 
@@ -47,11 +51,33 @@ public abstract class RestApiBaseTester {
         // Check 201 - Created
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
         
-        resp = RestAssured.given().accept(ContentType.JSON).get(uri);
+        resp = RestAssured.given().accept("application/hal+json").get(uri);
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
         
         // Retrieve resource and check is the same
+        resp = RestAssured.given().accept("application/hal+json").get(uri);
+        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
+        assertThat(resp.getBody().as(entity.getClass()), equalTo(entity));
+        
+        // cleanup
+        delete(uri, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+    }
+    
+    protected void testGetWithWrongAcceptHeader(final String uri, Object entity) {
+        
+        // post a book
+        Response resp = RestAssured
+            .given().accept(ContentType.JSON).contentType(ContentType.JSON).body(entity)
+            .post(uri);
+        
+        // Check 201 - Created
+        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
+        
         resp = RestAssured.given().accept(ContentType.JSON).get(uri);
+        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.CLIENT_ERR_NOT_ACCEPTABLE));
+        
+        // Retrieve resource and check is the same
+        resp = RestAssured.given().accept("application/hal+json").get(uri);
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
         assertThat(resp.getBody().as(entity.getClass()), equalTo(entity));
         
@@ -69,11 +95,11 @@ public abstract class RestApiBaseTester {
         // Check 201 - Created
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
         
-        resp = RestAssured.given().accept(ContentType.JSON).get(uri);
+        resp = RestAssured.given().accept("application/hal+json").get(uri);
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
         
         // Retrieve resource and check is the same
-        resp = RestAssured.given().accept(ContentType.JSON).get(uri);
+        resp = RestAssured.given().accept("application/hal+json").get(uri);
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
         
         // cleanup
@@ -81,7 +107,7 @@ public abstract class RestApiBaseTester {
     }
     
     protected void testGetNonExistingEntity(final String uri) {
-        Response resp = RestAssured.given().accept(ContentType.JSON).get(uri);
+        Response resp = RestAssured.given().accept("application/hal+json").get(uri);
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.CLIENT_ERR_NOT_FOUND));
     }
     
@@ -94,7 +120,7 @@ public abstract class RestApiBaseTester {
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
         
         // When - retrieved
-        resp = RestAssured.given().accept(ContentType.JSON).get(baseUri+"/"+secondaryId);
+        resp = RestAssured.given().accept("application/hal+json").get(baseUri+"/"+secondaryId);
         
         // Then - 200 (OK)
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
@@ -108,19 +134,22 @@ public abstract class RestApiBaseTester {
 
     }
     
-    protected void testGetAllResources(final String uri, final int nrOfResources) {
-        Response resp = RestAssured.given().accept(ContentType.JSON).get(uri);
+    protected <D extends ITestDto> void testGetAllResources(final String uri, final int nrOfResources, Class<D> dtoClazz) {
+        
+        Response resp = RestAssured.given().accept("application/hal+json").get(uri); 
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
-        assertThat(resp.getBody().jsonPath().getList(".").size(), equalTo(nrOfResources));
+        assertThat(resp.getBody().jsonPath().getList("_embedded"+"."+this.relName(dtoClazz)).size(), equalTo(nrOfResources));
+        
     }
     
-    protected <T> void testGetAllPaginatedAndSorted(final String paginationUri, List<T> dtosList) {
+    protected <T> void testGetAllPaginatedAndSorted(final String paginationUri, final int sizePage) {
         
-        final int totalRecords = 10;
-        final int numPages = 5;
-        final int sizePage = 2;
+        Response response = RestAssured.given().accept(ContentType.JSON).get(paginationUri);
+        
+        assertThat(response.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
 
-       
+        assertThat(response.getBody().jsonPath().getList(".").size(), equalTo(sizePage));
+        
     }
     
     protected <T> void testPostNewResourceOk (final String uri, Object entity, Class<T> clazzEntity) {
@@ -134,7 +163,7 @@ public abstract class RestApiBaseTester {
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
         
         // Retrieve resource and check is the same
-        resp = RestAssured.given().accept(ContentType.JSON).get(uri);
+        resp = RestAssured.given().accept("application/hal+json").get(uri);
         assertThat(resp.getBody().as(clazzEntity), equalTo(entity));
         
         // cleanup
@@ -175,7 +204,7 @@ public abstract class RestApiBaseTester {
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
         
         // Retrieve resource and check is the same
-        resp = RestAssured.given().accept(ContentType.JSON).get(uri);
+        resp = RestAssured.given().accept("application/hal+json").get(uri);
         assertThat(resp.getBody().as(clazzEntity), equalTo(entity));
         
         // cleanup
@@ -193,7 +222,7 @@ public abstract class RestApiBaseTester {
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
         
         // Retrieve resource and check is the same
-        resp = RestAssured.given().accept(ContentType.JSON).get(uri);
+        resp = RestAssured.given().accept("application/hal+json").get(uri);
         assertThat(resp.getBody().as(clazzEntity), equalTo(entity));
         
         // cleanup
@@ -247,7 +276,26 @@ public abstract class RestApiBaseTester {
 
     
     protected void cleanupDbCollection(final List<String> collectionNames) {
+        
         this.mongoDbOperations.cleanupDb(dbName, collectionNames);
+    }
+    
+    protected <E extends ITestDto> String relName (Class<E> dtoClazz) {
+        
+        if (dtoClazz.isAssignableFrom(CheckoutDto.class)) {
+            return "checkoutRecords";
+        }
+        else if (dtoClazz.isAssignableFrom(BookDto.class)) {                    
+            return "books";
+        }
+        else if(dtoClazz.isAssignableFrom(UserDto.class)) {
+            return "users";
+        }
+        else if(dtoClazz.isAssignableFrom(RoleDto.class)) {
+            return "roles";
+        }
+        return null;
+        
     }
 
 }

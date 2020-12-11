@@ -1,11 +1,13 @@
 package com.softuarium.celsvs.apitests.utils.dtos;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class BookAdditionalInfo {
        
-    private final Publisher publisher;
+    private Publisher publisher;
         
     private final String collection;
         

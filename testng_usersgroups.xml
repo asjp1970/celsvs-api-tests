@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 <suite name="Celsvs REST API Live tests">
-  <parameter name="mongodbUri"  value="wewe"/>
-  <!-- mongodb+srv://celsvs:C0AkLkBoEc2wopDc@celsvs-cluster-0-hskuw.gcp.mongodb.net/test?retryWrites=true&w=majority -->
+  <parameter name="mongodbUri"  value="mongodb+srv://celsvs:C0AkLkBoEc2wopDc@celsvs-cluster-0-hskuw.gcp.mongodb.net/test?retryWrites=true&amp;w=majority"/>
   <parameter name="dbName" value="biblioteca_test_db"/>
   <parameter name="booksCollectionName" value="books"/>
   <parameter name="checkoutsCollectionName" value="checkouts"/>
   <parameter name="publishersCollectionName" value="publishers"/>
-  <parameter name="usersCollectionName" value="users"/>
+  <parameter name="usersCollectionName" value="users_management"/>
   <parameter name="celsvsBaseUri" value="http://localhost:8080/celsvs/api"/>
   <parameter name="booksUri" value="books"/>
   <parameter name="usersUri" value="users"/>
