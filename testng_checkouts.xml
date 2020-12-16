@@ -11,20 +11,14 @@
   <parameter name="booksUri" value="books"/>
   <parameter name="usersUri" value="users"/>
   <parameter name="checkoutsUri" value="checkouts"/>
-  <test name="Test access to book resources" verbose="2">
+  <test name="Test access to Checkout resources" verbose="2">
   <groups>
     <run>
       <exclude name="hypermedia"/>
     </run>
   </groups>
     <classes>
-      <class name="com.softuarium.celsvs.apitests.RestApiCheckoutResourceTests">
-      	<!--  
-      	<methods>
-      		<include name="test_restApiCheckoutsGet_03"></include>
-      	</methods>
-      	-->
-      </class>
+      <class name="com.softuarium.celsvs.apitests.RestApiCheckoutResourceTests"/>
     </classes>
   </test> <!-- Test access to book resources -->
 </suite> <!-- Celsvs REST API Live tests -->

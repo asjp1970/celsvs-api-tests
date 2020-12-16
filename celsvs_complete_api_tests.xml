@@ -12,7 +12,7 @@
   <parameter name="usersUri" value="users"/>
   <parameter name="checkoutsUri" value="checkouts"/>
   <parameter name="rolesUri" value="aum/userRoles"/>
-  
+  <parameter name="publishersUri" value="publishers"/>
   <test name="Celsvs REST API Scenarios tests" verbose="2">
 	<groups>
     	<run>
@@ -36,6 +36,7 @@
     <classes>
       <class name="com.softuarium.celsvs.apitests.RestApiBookResourceTests"/>
       <class name="com.softuarium.celsvs.apitests.RestApiCheckoutResourceTests"/>
+      <class name="com.softuarium.celsvs.apitests.RestApiPublisherResourceTests"/>
     </classes>
   </test> <!-- Test access to book resources -->
   

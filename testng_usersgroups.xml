@@ -3,24 +3,12 @@
 <suite name="Celsvs REST API Live tests">
   <parameter name="mongodbUri"  value="mongodb+srv://celsvs:C0AkLkBoEc2wopDc@celsvs-cluster-0-hskuw.gcp.mongodb.net/test?retryWrites=true&amp;w=majority"/>
   <parameter name="dbName" value="biblioteca_test_db"/>
-  <parameter name="booksCollectionName" value="books"/>
-  <parameter name="checkoutsCollectionName" value="checkouts"/>
-  <parameter name="publishersCollectionName" value="publishers"/>
   <parameter name="usersCollectionName" value="users_management"/>
   <parameter name="celsvsBaseUri" value="http://localhost:8080/celsvs/api"/>
-  <parameter name="booksUri" value="books"/>
-  <parameter name="usersUri" value="users"/>
-  <parameter name="checkoutsUri" value="checkouts"/>
   <parameter name="rolesUri" value="aum/userRoles"/>
   <test name="Test access to user group resources" verbose="2">
     <classes>
-      <class name="com.softuarium.celsvs.apitests.RestApiUserRolesResourceTests">
-        <!--  
-        <methods>
-        	<include name="test_restApiUserGroupPost_01"/>
-        </methods>
-        -->
-      </class>
+      <class name="com.softuarium.celsvs.apitests.RestApiUserRolesResourceTests"/>
     </classes>
   </test> <!-- Test access to book resources -->
 </suite> <!-- Celsvs REST API Live tests -->

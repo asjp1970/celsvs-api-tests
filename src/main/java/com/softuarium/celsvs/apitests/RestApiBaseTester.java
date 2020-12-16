@@ -12,6 +12,7 @@ import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
 import com.softuarium.celsvs.apitests.utils.dtos.CheckoutDto;
 import com.softuarium.celsvs.apitests.utils.dtos.ITestDto;
+import com.softuarium.celsvs.apitests.utils.dtos.PublisherDto;
 import com.softuarium.celsvs.apitests.utils.dtos.RoleDto;
 import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
 import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
@@ -43,7 +44,7 @@ public abstract class RestApiBaseTester {
     
     protected void testGetExistingEntity(final String uri, Object entity) {
         
-        // post a book
+        // post the entity
         Response resp = RestAssured
             .given().accept(ContentType.JSON).contentType(ContentType.JSON).body(entity)
             .post(uri);
@@ -142,13 +143,13 @@ public abstract class RestApiBaseTester {
         
     }
     
-    protected <T> void testGetAllPaginatedAndSorted(final String paginationUri, final int sizePage) {
+    protected <D extends ITestDto> void testGetAllPaginatedAndSorted(final String paginationUri, final int sizePage, Class<D> dtoClazz) {
         
-        Response response = RestAssured.given().accept(ContentType.JSON).get(paginationUri);
+        Response response = RestAssured.given().accept("application/json").get(paginationUri);
         
         assertThat(response.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
 
-        assertThat(response.getBody().jsonPath().getList(".").size(), equalTo(sizePage));
+        assertThat(response.getBody().jsonPath().getList("_embedded"+"."+this.relName(dtoClazz)).size(), equalTo(sizePage));
         
     }
     
@@ -293,6 +294,9 @@ public abstract class RestApiBaseTester {
         }
         else if(dtoClazz.isAssignableFrom(RoleDto.class)) {
             return "roles";
+        }
+        else if(dtoClazz.isAssignableFrom(PublisherDto.class)) {
+            return "publishers";
         }
         return null;
         

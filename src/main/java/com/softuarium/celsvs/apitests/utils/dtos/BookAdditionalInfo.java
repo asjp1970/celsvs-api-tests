@@ -7,7 +7,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class BookAdditionalInfo {
        
-    private Publisher publisher;
+    private String publisher;
         
     private final String collection;
         

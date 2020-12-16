@@ -13,7 +13,6 @@ import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.dtos.BookAdditionalInfo;
 import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
 import com.softuarium.celsvs.apitests.utils.dtos.CheckoutDto;
-import com.softuarium.celsvs.apitests.utils.dtos.Publisher;
 import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.get;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.post;
@@ -32,14 +31,15 @@ public class TestBookRecordsScenarios {
         // TODO Auto-generated constructor stub
     }
     
-    @Parameters({ "celsvsBaseUri", "checkoutsUri", "booksUri", "usersUri" })
+    @Parameters({ "celsvsBaseUri", "checkoutsUri", "booksUri", "usersUri", "publishersUri" })
     @BeforeClass
     public void beforeClass(final String celsvsUri, final String checkoutsUriFragment,
-            final String booksUriFragment, final String usersUriFragment) {
+            final String booksUriFragment, final String usersUriFragment, final String publishersUriFragment) {
         
         this.checkoutsUri = celsvsUri + "/" + checkoutsUriFragment;
         this.checkoutsDocUri = checkoutsUri + "/document";
         this.booksUri = celsvsUri+"/"+booksUriFragment;
+        this.publishersUri = celsvsUri+"/"+publishersUriFragment;
         this.usersUri = celsvsUri+"/"+usersUriFragment;
         
     }
@@ -53,26 +53,24 @@ public class TestBookRecordsScenarios {
      *  - If the name has several words, the fist letter of each word will be transformed in capital letter
      *    and the rest small letters
      */
-    @Test(description="Given new book record with publisher in additional info, the name of the publisher is stored normalized",
-          groups = { "wip" })
+    @Test(description="Given new book record with publisher in additional info, the name of the publisher is stored normalized")
     public void test_BookScenario_01() {
         
         final String isbn = randomNumeric(13);
         BookDto bookDto = (BookDto) createDto(BookDto.class, isbn);
         
         BookAdditionalInfo detailedInfo = bookDto.getDetailedInfo();
-        Publisher publisher = detailedInfo.getPublisher();
-        publisher.setName("editorial Crítica");
-        detailedInfo.setPublisher(publisher);
-        bookDto.setDetailedInfo(detailedInfo);
+        String publisherName = detailedInfo.getPublisher();
+        detailedInfo.setPublisher("editorial Crítica");
         
         post(this.booksUri + "/" + isbn, bookDto, RestApiHttpStatusCodes.SUCCESS_CREATED);
         
-        get(this.publishersUri + "/" + publisher.getName(), RestApiHttpStatusCodes.SUCCESS_OK);
+        get(this.publishersUri + "/" + "editorial Crítica", RestApiHttpStatusCodes.SUCCESS_OK);
         
         
         // cleanup resources
         delete(this.booksUri + "/" + isbn, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        delete(this.publishersUri + "/" + publisherName, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
        
     }
     
@@ -113,12 +111,12 @@ public class TestBookRecordsScenarios {
         
         // when - book record deleted then - 204 No Content is received and the book record is deleted
         delete(this.booksUri + "/" + isbn, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
-        get(this.booksUri + "/" + isbn, RestApiHttpStatusCodes.CLIENT_ERR_NOT_FOUND);
 
         // Cleanup:
         delete(this.usersUri + "/" + userId, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
 
     }
+    
 }
 
 

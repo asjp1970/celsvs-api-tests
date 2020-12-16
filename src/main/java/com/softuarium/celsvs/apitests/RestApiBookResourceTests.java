@@ -2,7 +2,6 @@ package com.softuarium.celsvs.apitests;
 
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
-import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
 
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createDto;
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createManyDtos;
@@ -20,7 +19,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.testng.annotations.Parameters;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -129,7 +127,7 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
             assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
         });
         
-        this.testGetAllPaginatedAndSorted(uriResource, sizePage);
+        this.testGetAllPaginatedAndSorted(uriResource, sizePage, BookDto.class);
         
         // cleanup
         list.forEach(br -> {

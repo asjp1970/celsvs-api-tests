@@ -39,6 +39,10 @@ public class DtoFactory {
                     randomAlphabetic(20),        // name
                     randomAlphabetic(120));    // description
         }
+        else if(clazz.isAssignableFrom(PublisherDto.class)) {
+            return createDto(PublisherDto.class,
+                    randomAlphabetic(20));    // name
+        }
         return dto; // null
     }
     
@@ -61,6 +65,21 @@ public class DtoFactory {
         else if(clazz.isAssignableFrom(RoleDto.class)) {
             return new RoleDto( id,   // name
                     randomAlphabetic(120)); // description
+        }
+        else if (clazz.isAssignableFrom(PublisherDto.class)) {
+            return new PublisherDto(
+                    id,   // publisher's name
+                    randomAlphabetic(10),   // publisher's group
+                    new ContactInfo(
+                            new Address(
+                                    randomAlphabetic(20),   // street
+                                    57,                     // num
+                                    randomAlphabetic(20),   // additional info
+                                    randomAlphabetic(20),   // city
+                                    randomNumeric(5)),      // zip code
+                            randomAlphabetic(20),
+                            Arrays.asList(randomNumeric(12), randomNumeric(12))),
+                            "www.editorial"+randomAlphabetic(8)+".com");
         }
         
         return dto; // null
@@ -89,20 +108,7 @@ public class DtoFactory {
                     randomAlphabetic(50),           // subtitle
                     3,                              // num copies
                     true,
-                    new BookAdditionalInfo(
-                            new Publisher(
-                                    randomAlphabetic(10),   // publisher's name
-                                    randomAlphabetic(10),   // publisher's group
-                                    new ContactInfo(
-                                            new Address(
-                                                    randomAlphabetic(20),   // street
-                                                    57,                     // num
-                                                    randomAlphabetic(20),   // additional info
-                                                    randomAlphabetic(20),   // city
-                                                    randomNumeric(5)),      // zip code
-                                            randomAlphabetic(20),
-                                            Arrays.asList(randomNumeric(12), randomNumeric(12))),
-                                    randomAlphabetic(20)),  // translator
+                    new BookAdditionalInfo(randomAlphabetic(15), // publisher
                                     randomAlphabetic(15),   // collection
                                     new Synopsis(
                                             478,
@@ -133,6 +139,7 @@ public class DtoFactory {
         return dto;
     }
     
+    @SuppressWarnings("unchecked")
     public static <T extends ITestDto> List<T> createManyDtos (Class<T> clazz, final int qty){
         
         List<T> list = new ArrayList<T>();

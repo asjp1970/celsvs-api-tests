@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class Publisher {
+public class PublisherDto implements ITestDto {
     
     private String name;
     
@@ -14,4 +14,5 @@ public class Publisher {
     private ContactInfo contact;
     
     private String web;
+  
 }

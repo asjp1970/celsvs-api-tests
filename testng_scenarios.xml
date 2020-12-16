@@ -11,6 +11,7 @@
   <parameter name="booksUri" value="books"/>
   <parameter name="usersUri" value="users"/>
   <parameter name="checkoutsUri" value="checkouts"/>
+  <parameter name="publishersUri" value="publishers"/>
   <test name="Celsvs REST API Scenarios tests" verbose="2">
     <groups>
       <run>
