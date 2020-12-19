@@ -24,7 +24,6 @@ public class TestDocumentCheckoutScenarios {
     private String usersUri;
 
     public TestDocumentCheckoutScenarios() {
-        // TODO Auto-generated constructor stub
     }
     
     @Parameters({ "celsvsBaseUri", "checkoutsUri", "booksUri", "usersUri" })
@@ -41,9 +40,9 @@ public class TestDocumentCheckoutScenarios {
     
     /**
      * Scenario 1
-     * Given inexistent book and user records in database, when attempt to checkout, then if fails until all resources are created
+     * Given inexistent book record in database, when attempt to checkout, then if fails until all resources are created
      */
-    @Test(description="Checkout not possible until book and user records exist in database")
+    @Test(description="Checkout not possible until book record exist in database")
     public void test_checkoutScenario_01() {
         
         final String isbn = randomNumeric(13);
@@ -52,32 +51,26 @@ public class TestDocumentCheckoutScenarios {
         CheckoutDto checkoutDto = (CheckoutDto) createDto(CheckoutDto.class, signature);
         checkoutDto.setUserId(userId);
         
-        // Step 1. Attempt the checkout by doing a POST on the checkout. Check that 404 Not found
-        // is returned because the document does not exist
-        post(this.checkoutsDocUri + "/" + signature, checkoutDto,
-                RestApiHttpStatusCodes.CLIENT_ERR_NOT_FOUND);
-        
-        // Step 2. Post the document to checkout
-        post(this.booksUri + "/" + isbn, 
-                createDto(BookDto.class, isbn, signature),
-                RestApiHttpStatusCodes.SUCCESS_CREATED);
-
-        // Step 3. Attempt the checkout again. Now it should fail because the user is not defined,
-        // again with 404 Not found
-        post(this.checkoutsDocUri + "/" + signature, checkoutDto,
-                RestApiHttpStatusCodes.CLIENT_ERR_NOT_FOUND);
-        
-        // Step 4. Post the library user
+        // Step 1. Post the library user (pre-requisite for this test case)
         post(this.usersUri + "/" + userId, 
                 createDto(UserDto.class, userId),
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
-        // Step 5. Attempt the checkout again. This time it is expected 202 Created
+        // Step 2. Attempt the checkout by doing a POST on the checkout. Check that 404 Not found
+        // is returned because the document does not exist
+        post(this.checkoutsDocUri + "/" + signature, checkoutDto,
+                RestApiHttpStatusCodes.CLIENT_ERR_NOT_FOUND);
+        
+        // Step 3. Post the book record
+        post(this.booksUri + "/" + isbn, 
+                createDto(BookDto.class, isbn, signature),
+                RestApiHttpStatusCodes.SUCCESS_CREATED);
+
+        // Step 4. Attempt the checkout again. This time it is expected 202 Created
         post(this.checkoutsDocUri + "/" + signature, checkoutDto,
                 RestApiHttpStatusCodes.SUCCESS_CREATED);
         
-        // Step 6. cleanup resources, in the right order
-        delete(this.checkoutsDocUri + "/" + signature, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        // Step 5. cleanup resources, in the right order
         delete(this.checkoutsDocUri + "/" + signature, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
         delete(this.usersUri + "/" + userId, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
         delete(this.booksUri + "/" + isbn, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
@@ -87,10 +80,48 @@ public class TestDocumentCheckoutScenarios {
     
     /**
      * Scenario 2
+     * Given inexistent user record in database, when attempt to checkout, then if fails until all resources are created
+     */
+    @Test(description="Checkout not possible until user record exist in database")
+    public void test_checkoutScenario_02() {
+        
+        final String isbn = randomNumeric(13);
+        final String signature = randomAlphanumeric(10);
+        final String userId = randomAlphanumeric(8);
+        CheckoutDto checkoutDto = (CheckoutDto) createDto(CheckoutDto.class, signature);
+        checkoutDto.setUserId(userId);
+        
+        // Step 1. Create the document that will be checked-out
+        post(this.booksUri + "/" + isbn, 
+                createDto(BookDto.class, isbn, signature),
+                RestApiHttpStatusCodes.SUCCESS_CREATED);
+        
+        // Step 2. Attempt the checkout. It should fail because the user is not defined,
+        // again with 404 Not found
+        post(this.checkoutsDocUri + "/" + signature, checkoutDto, RestApiHttpStatusCodes.CLIENT_ERR_NOT_FOUND);
+        
+        // Step 3. Create a record for the library user
+        post(this.usersUri + "/" + userId, 
+                createDto(UserDto.class, userId),
+                RestApiHttpStatusCodes.SUCCESS_CREATED);
+        
+        // Step 4. Attempt the checkout again. This time it is expected 202 Created
+        post(this.checkoutsDocUri + "/" + signature, checkoutDto,
+                RestApiHttpStatusCodes.SUCCESS_CREATED);
+        
+        // Step 6. cleanup resources, in the right order
+        delete(this.checkoutsDocUri + "/" + signature, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        delete(this.usersUri + "/" + userId, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+        delete(this.booksUri + "/" + isbn, RestApiHttpStatusCodes.SUCCESS_NO_CONTENT);
+
+    }
+    
+    /**
+     * Scenario 3
      * Given a limit of simultaneous document checkouts = 3, when the 4rth checkout is attempted, then it fails with 403 Forbidden
      */
     @Test(description="Check limit of nr of document checkouts for the same user")
-    public void test_checkoutScenario_02() {
+    public void test_checkoutScenario_03() {
         
         final String isbn1 = randomNumeric(13);
         final String isbn2 = randomNumeric(13);
