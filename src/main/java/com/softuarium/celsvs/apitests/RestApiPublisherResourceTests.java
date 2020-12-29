@@ -2,6 +2,7 @@ package com.softuarium.celsvs.apitests;
 
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.dtos.PublisherDto;
+import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
 
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createDto;
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createManyDtos;
@@ -20,7 +21,6 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeSuite;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,15 +33,11 @@ public class RestApiPublisherResourceTests extends RestApiBaseTester {
    
     private String publishersUri;
     
-    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri" })
-    @BeforeSuite
-    public void beforeSuite(final String mongodbUri, final String mongoDbName, final String celsvsUri) {
-        super.beforeSuite(mongodbUri, mongoDbName, celsvsUri);
-    }
-    
-    @Parameters({ "celsvsBaseUri", "publishersUri" })
+    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri", "publishersUri" })
     @BeforeClass
-    public void beforeClass(final String celsvsUri, final String publishersUriFragment) {
+    public void beforeClass(final String mongodbUri, final String mongoDbName, final String celsvsUri, final String publishersUriFragment) {
+        this.dbName = mongoDbName;
+        this.mongoDbOperations = new MongoDbOperations(mongodbUri, mongoDbName);
         
         this.publishersUri = celsvsUri+"/"+publishersUriFragment;
         
@@ -49,11 +45,6 @@ public class RestApiPublisherResourceTests extends RestApiBaseTester {
     
     @Parameters({ "publishersCollectionName" })
     @BeforeMethod
-    public void setup(final String publishersCollectionName) {
-        cleanupDbCollection(Arrays.asList(publishersCollectionName));
-    }
-    
-    @Parameters({ "publishersCollectionName" })
     @AfterMethod
     public void cleanup(final String publishersCollectionName) {
         cleanupDbCollection(Arrays.asList(publishersCollectionName));

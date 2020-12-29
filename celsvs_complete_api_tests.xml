@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 <suite name="Celsvs complete REST API Functional Test Suite">
-  <parameter name="mongodbUri"  value="mongodb+srv://celsvs:C0AkLkBoEc2wopDc@celsvs-cluster-0-hskuw.gcp.mongodb.net/test?retryWrites=true&amp;w=majority"/>
-  <parameter name="dbName" value="biblioteca_test_db"/>
+  <parameter name="mongodbUri"  value="mongodb://localhost:27017"/>
+  <parameter name="dbName" value="celsvs-library-test"/>
   <parameter name="booksCollectionName" value="books"/>
   <parameter name="checkoutsCollectionName" value="checkouts"/>
   <parameter name="publishersCollectionName" value="publishers"/>

@@ -2,6 +2,7 @@ package com.softuarium.celsvs.apitests;
 
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.dtos.RoleDto;
+import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
 
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.delete;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.post;
@@ -13,7 +14,7 @@ import org.testng.annotations.Test;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.BeforeMethod;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 
@@ -27,21 +28,18 @@ public class RestApiUserRolesResourceTests extends RestApiBaseTester {
     
     private String rolesUri;
     
-    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri" })
-    @BeforeSuite
-    public void beforeSuite(final String mongodbUri, final String mongoDbName, final String celsvsUri) {
-        super.beforeSuite(mongodbUri, mongoDbName, celsvsUri);
-    }
-    
-    @Parameters({ "celsvsBaseUri", "rolesUri" })
+    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri", "rolesUri" })
     @BeforeClass
-    public void beforeClass(final String celsvsUri, final String rolesUriFragment) {
+    public void beforeClass(final String mongodbUri, final String mongoDbName, final String celsvsUri, final String rolesUriFragment) {
+        this.dbName = mongoDbName;
+        this.mongoDbOperations = new MongoDbOperations(mongodbUri, mongoDbName);
         
         this.rolesUri = celsvsUri+"/"+rolesUriFragment;
         
     }
     
     @Parameters({"usersCollectionName"})
+    @BeforeMethod
     @AfterMethod
     public void cleanup(final String usersColName) {
         cleanupDbCollection(Arrays.asList(usersColName));

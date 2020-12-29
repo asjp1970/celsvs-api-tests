@@ -2,6 +2,7 @@ package com.softuarium.celsvs.apitests;
 
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
+import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
 
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createDto;
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createManyDtos;
@@ -22,7 +23,6 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeSuite;
 
 import static org.testng.Assert.fail;
 
@@ -36,16 +36,12 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 public class RestApiBookResourceTests extends RestApiBaseTester {
         
     private String booksUri;
-    
-    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri" })
-    @BeforeSuite
-    public void beforeSuite(final String mongodbUri, final String mongoDbName, final String celsvsUri) {
-        super.beforeSuite(mongodbUri, mongoDbName, celsvsUri);
-    }
-    
-    @Parameters({ "celsvsBaseUri", "booksUri" })
+        
+    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri", "booksUri" })
     @BeforeClass
-    public void beforeClass(final String celsvsUri, final String booksUriFragment) {
+    public void beforeClass(final String mongodbUri, final String mongoDbName, final String celsvsUri, final String booksUriFragment) {
+        this.dbName = mongoDbName;
+        this.mongoDbOperations = new MongoDbOperations(mongodbUri, mongoDbName);
         
         this.booksUri = celsvsUri+"/"+booksUriFragment;
         
@@ -53,11 +49,6 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
     
     @Parameters({ "booksCollectionName", "publishersCollectionName" })
     @BeforeMethod
-    public void setup(final String booksCollectionName, final String publishersCollectionName) {
-        cleanupDbCollection(Arrays.asList(booksCollectionName, publishersCollectionName));
-    }
-    
-    @Parameters({ "booksCollectionName", "publishersCollectionName" })
     @AfterMethod
     public void cleanup(final String booksCollectionName, final String publishersCollectionName) {
         cleanupDbCollection(Arrays.asList(booksCollectionName, publishersCollectionName));

@@ -2,6 +2,7 @@ package com.softuarium.celsvs.apitests;
 
 import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
+import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -19,7 +20,6 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeSuite;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -34,28 +34,19 @@ import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 public class RestApiUserResourceTests extends RestApiBaseTester {
     
     private String usersUri;
-    
-    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri" })
-    @BeforeSuite
-    public void beforeSuite(final String mongodbUri, final String mongoDbName, final String celsvsUri) {
-        super.beforeSuite(mongodbUri, mongoDbName, celsvsUri);
-    }
-    
-    @Parameters({ "celsvsBaseUri", "usersUri" })
+      
+    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri", "usersUri" })
     @BeforeClass
-    public void beforeClass(final String celsvsUri, final String usersUriFragment) {
+    public void beforeClass(final String mongodbUri, final String mongoDbName, final String celsvsUri, final String usersUriFragment) {
+        this.dbName = mongoDbName;
+        this.mongoDbOperations = new MongoDbOperations(mongodbUri, mongoDbName);
         
         this.usersUri = celsvsUri+"/"+usersUriFragment;
         
     }
     
-    @Parameters({ "usersCollectionName" })
-    @BeforeMethod
-    public void setup(final String usersCollectionName) {
-        cleanupDbCollection(Arrays.asList(usersCollectionName));
-    }
-    
     @Parameters({"usersCollectionName"})
+    @BeforeMethod
     @AfterMethod
     public void cleanup(final String usersCollectionName) {
         cleanupDbCollection(Arrays.asList(usersCollectionName));

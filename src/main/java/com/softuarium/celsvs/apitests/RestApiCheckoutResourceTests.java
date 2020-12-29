@@ -4,6 +4,8 @@ import com.softuarium.celsvs.apitests.utils.RestApiHttpStatusCodes;
 import com.softuarium.celsvs.apitests.utils.dtos.BookDto;
 import com.softuarium.celsvs.apitests.utils.dtos.CheckoutDto;
 import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
+import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
+
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createDto;
 import static com.softuarium.celsvs.apitests.utils.dtos.DtoFactory.createManyDtos;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.post;
@@ -13,7 +15,7 @@ import org.testng.annotations.Test;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.BeforeMethod;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
@@ -29,15 +31,12 @@ public class RestApiCheckoutResourceTests extends RestApiBaseTester {
     private String booksUri;
     private String usersUri;
     
-    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri" })
-    @BeforeSuite
-    public void beforeSuite(final String mongodbUri, final String mongoDbName, final String celsvsUri) {
-        super.beforeSuite(mongodbUri, mongoDbName, celsvsUri);
-    }
-    
-    @Parameters({ "celsvsBaseUri", "checkoutsUri", "booksUri", "usersUri" })
+      
+    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri", "checkoutsUri", "booksUri", "usersUri" })
     @BeforeClass
-    public void beforeClass(final String celsvsUri, final String checkoutsUriFragment, final String booksUri, final String usersUri) {
+    public void beforeClass(final String mongodbUri, final String mongoDbName, final String celsvsUri, final String checkoutsUriFragment, final String booksUri, final String usersUri) {
+        this.dbName = mongoDbName;
+        this.mongoDbOperations = new MongoDbOperations(mongodbUri, mongoDbName);
         
         this.checkoutsUri = celsvsUri + "/" + checkoutsUriFragment;
         this.checkoutsDocUri = checkoutsUri + "/document";
@@ -46,6 +45,7 @@ public class RestApiCheckoutResourceTests extends RestApiBaseTester {
     }
     
     @Parameters({ "booksCollectionName", "publishersCollectionName", "checkoutsCollectionName", "usersCollectionName"})
+    @BeforeMethod
     @AfterMethod
     public void cleanup(final String booksColName, final String publishersColName,
                         final String checkoutsColName, final String usersColName) {

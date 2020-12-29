@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.List;
 
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Parameters;
 
@@ -18,7 +19,6 @@ import com.softuarium.celsvs.apitests.utils.dtos.UserDto;
 import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.delete;
 
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -26,20 +26,17 @@ import io.restassured.response.Response;
 public abstract class RestApiBaseTester {
     
     protected String mongoDbUri;
-    private String dbName;
-    private MongoDbOperations mongoDbOperations;
-
-    protected RestApiBaseTester() {
-        // TODO Auto-generated constructor stub
+    protected String dbName;
+    protected MongoDbOperations mongoDbOperations;
+           
+    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri" })
+    @BeforeSuite(alwaysRun=true)
+    public void testSuiteSetup(final String mongodbUri, final String mongoDbName, final String celsvsUri) {
+        
     }
     
-    @Parameters({ "mongodbUri", "dbName", "celsvsBaseUri" })
-    @BeforeSuite
-    public void beforeSuite(final String mongodbUri, final String mongoDbName, final String celsvsUri) {
-        this.dbName = mongoDbName;
-        this.mongoDbOperations = new MongoDbOperations(mongodbUri, mongoDbName);
-
-        // RestAssured.baseURI = this.celsvsBaseUri;
+    @AfterSuite(alwaysRun=true)
+    public void testSuiteTeardown() {
     }
     
     protected void testGetExistingEntity(final String uri, Object entity) {
