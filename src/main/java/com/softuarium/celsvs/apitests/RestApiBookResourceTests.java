@@ -91,7 +91,9 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
             assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
         });
         
-        this.testGetAllResources(this.booksUri, totalRecords, BookDto.class);
+        String fetchAllUri = this.booksUri.concat(String.format("?page=0&size=%d", totalRecords));
+                
+        this.testGetAllResources(fetchAllUri, totalRecords, BookDto.class);
         
         // cleanup
         list.forEach(br -> {

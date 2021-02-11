@@ -77,7 +77,9 @@ public class RestApiPublisherResourceTests extends RestApiBaseTester {
             assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
         });
         
-        this.testGetAllResources(this.publishersUri, totalRecords, PublisherDto.class);
+        String fetchAllUri = this.publishersUri.concat(String.format("?page=0&size=%d", totalRecords));
+        
+        this.testGetAllResources(fetchAllUri, totalRecords, PublisherDto.class);
         
         // cleanup
         list.forEach(p -> {

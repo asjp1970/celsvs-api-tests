@@ -15,9 +15,7 @@
   </groups>
     <classes>
       <class name="com.softuarium.celsvs.apitests.RestApiBookResourceTests">
-      	<methods>
-      		<include name="test_restApiBooksGet_01"></include>
-      	</methods>
+      	
       </class>
     </classes>
   </test> <!-- Test access to book resources -->

@@ -104,8 +104,10 @@ public class RestApiCheckoutResourceTests extends RestApiBaseTester {
             });
               
         // GET ALL checkout records
+        
+        String fetchAllUri = checkoutsUri.concat(String.format("?page=0&size=100"));
     
-        this.testGetAllResources(checkoutsUri, bookDtosList.size(), CheckoutDto.class);
+        this.testGetAllResources(fetchAllUri, bookDtosList.size(), CheckoutDto.class);
         
         // cleanup
         bookDtosList.forEach(d -> {

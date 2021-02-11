@@ -2,6 +2,7 @@ package com.softuarium.celsvs.apitests;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 
 import java.util.List;
 
@@ -20,6 +21,8 @@ import com.softuarium.celsvs.apitests.utils.mongodb.MongoDbOperations;
 import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.delete;
 
 import io.restassured.RestAssured;
+import static io.restassured.RestAssured.given;
+import static io.restassured.RestAssured.when;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 
@@ -107,6 +110,7 @@ public abstract class RestApiBaseTester {
     protected void testGetNonExistingEntity(final String uri) {
         Response resp = RestAssured.given().accept("application/hal+json").get(uri);
         assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.CLIENT_ERR_NOT_FOUND));
+        
     }
     
     protected void testGetExistingEntity2ndKey(final String baseUri, final String primaryId, final String secondaryId, Object entity) {
@@ -134,19 +138,17 @@ public abstract class RestApiBaseTester {
     
     protected <D extends ITestDto> void testGetAllResources(final String uri, final int nrOfResources, Class<D> dtoClazz) {
         
-        Response resp = RestAssured.given().accept("application/hal+json").get(uri); 
-        assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
-        assertThat(resp.getBody().jsonPath().getList("_embedded"+"."+this.relName(dtoClazz)).size(), equalTo(nrOfResources));
-        
+        given().accept("application/hal+json").get(uri).
+        then().statusCode(RestApiHttpStatusCodes.SUCCESS_OK).
+        and().body("_embedded"+"."+this.relName(dtoClazz), hasSize(nrOfResources));
     }
     
     protected <D extends ITestDto> void testGetAllPaginatedAndSorted(final String paginationUri, final int sizePage, Class<D> dtoClazz) {
         
-        Response response = RestAssured.given().accept("application/json").get(paginationUri);
-        
-        assertThat(response.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_OK));
-
-        assertThat(response.getBody().jsonPath().getList("_embedded"+"."+this.relName(dtoClazz)).size(), equalTo(sizePage));
+        given().accept("application/hal+json").get(paginationUri).
+        then().statusCode(RestApiHttpStatusCodes.SUCCESS_OK)
+              .and().contentType("application/hal+json")
+              .and().body("_embedded"+"."+this.relName(dtoClazz), hasSize(sizePage));
         
     }
     

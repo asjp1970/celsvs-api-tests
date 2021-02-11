@@ -89,7 +89,9 @@ public class RestApiUserResourceTests extends RestApiBaseTester {
             assertThat(resp.getStatusCode(), equalTo(RestApiHttpStatusCodes.SUCCESS_CREATED));
         });
         
-        this.testGetAllResources(this.usersUri, totalRecords, UserDto.class);
+        String fetchAllUri = this.usersUri.concat(String.format("?page=0&size=%d", totalRecords));
+        
+        this.testGetAllResources(fetchAllUri, totalRecords, UserDto.class);
         
         // cleanup
         list.forEach(r -> {
