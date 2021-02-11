@@ -13,7 +13,7 @@ public class BookAdditionalInfo {
         
     private final Synopsis synopsis;
         
-    private final String originalTile;
+    private final String originalTitle;
         
     private final String translator;
         
