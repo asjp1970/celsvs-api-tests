@@ -1,0 +1,8 @@
+.classpath
+.factorypath
+.project
+.settings/
+*.swp
+bin/
+target/
+test-output/

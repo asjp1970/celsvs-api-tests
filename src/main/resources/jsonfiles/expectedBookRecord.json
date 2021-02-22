@@ -1,0 +1,48 @@
+{
+	"isbn": "9788446027744",
+  	"signature": "AD-11-CDD2",
+  	"title": "Comprender la Edad Media",
+  	"subtitle": "La transformación de ideas y actitudes en el mundo medieval",
+  	"authors": [
+		"Harald Kleinschmidt"
+  	],
+  	"available": false,
+  	"numOfCopies": 0,
+  	"detailedInfo": {
+		"publisher": {
+ 			"name": "Akal",
+ 			"group": null,
+ 			"contact": {
+  				"address": {
+					"street": "Sector Foresta",
+					"nr": 1,
+					"additionalInfo": "Madrid",
+					"city": "Tres Cantos",
+					"zipCode": "28760"
+  				},
+  				"email": "editions@prentice.com",
+  				"phoneNrs": [
+					null
+  				]
+ 				},
+ 			"web": "http://www.akal.com"
+			},
+		"collection": "Universitaria. Serie historia medieval",
+		"synopsis": {
+ 			"nrPgs": 461,
+ 			"genre": "string",
+ 			"subGenre": "string",
+ 			"synopsis": "string"
+		},
+		"originalTile": "Understanding the midle ages",
+		"translator": "string"
+  		},
+  	"_links": {
+        "books": {
+            "href": "http://localhost:8080/celsvs/api/books"
+        },
+        "self": {
+            "href": "http://localhost:8080/celsvs/api/books/9788446027744"
+        }
+    }
+ }
