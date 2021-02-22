@@ -22,7 +22,6 @@ import static com.softuarium.celsvs.apitests.utils.BasicRestOperations.delete;
 
 import io.restassured.RestAssured;
 import static io.restassured.RestAssured.given;
-import static io.restassured.RestAssured.when;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 

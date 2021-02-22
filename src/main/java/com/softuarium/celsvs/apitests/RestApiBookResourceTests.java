@@ -26,11 +26,18 @@ import org.testng.annotations.BeforeMethod;
 
 import static org.testng.Assert.fail;
 
+import java.net.URI;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.client.Traverson;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.EntityModel;
 
 @Test(groups = { "functional", "api", "books" })
 public class RestApiBookResourceTests extends RestApiBaseTester {
@@ -236,8 +243,24 @@ public class RestApiBookResourceTests extends RestApiBaseTester {
     // HATEOAS
     
     @Test(groups = {"hypermedia"},
-          description="Given an existing resource, when retrieved, then the expected hypermedia links are received and lead to the rigth resources")
+          description="Given an existing resource, can traverse self link")
     public void test_hypermedia_01() {
+        
+        final String isbn = randomNumeric(13);
+        final String sign = randomAlphanumeric(10);
+        final BookDto br = (BookDto) createDto(BookDto.class, isbn, sign);
+        
+        // post a book and
+        post(this.booksUri+"/"+isbn, br, RestApiHttpStatusCodes.SUCCESS_CREATED);
+        
+        ParameterizedTypeReference<EntityModel<BookDto>> resourceParameterizedTypeReference = new ParameterizedTypeReference<EntityModel<BookDto>>() {};
+
+        
+        EntityModel<BookDto> resourcePa = new Traverson(URI.create(this.booksUri), MediaTypes.HAL_JSON)
+                .follow("self")
+                .withTemplateParameters(new HashMap<String, Object>())
+                .toObject(resourceParameterizedTypeReference);
+        
         fail("Not yet implemented");
     }
     

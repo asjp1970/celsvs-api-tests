@@ -1,7 +1,5 @@
 package com.softuarium.celsvs.apitests.utils.dtos;
 
-import java.util.Date;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
